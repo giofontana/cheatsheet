@@ -10,7 +10,10 @@
 * Commands:
 
 ```bash
-
+./openshift-install create install-config --dir ocp-install
+# Define install-config (example below)
+./openshift-install create cluster --dir ocp-install/ --log-level=debug
+```
 
 * Example of install-config for a disconnected installation:
 
