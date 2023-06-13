@@ -1,5 +1,11 @@
 
-1. Edit pull secret adding cred for new registry:
+1. Test the secret for new registry first:
+
+```
+podman pull --authfile pull-secret quay-2.sandbox1829.opentlc.com/openshift/openshift/release-images:4.11.38-x86_64
+```
+
+2. Edit pull secret adding cred for new registry:
 
 ```
 oc get secret/pull-secret -n openshift-config --template='{{index .data ".dockerconfigjson" | base64decode}}' > pull-secret
@@ -7,7 +13,7 @@ oc registry login --registry=quay-2.sandbox1829.opentlc.com --auth-basic="opensh
 oc set data secret/pull-secret -n openshift-config --from-file=.dockerconfigjson=pull-secret
 ```
 
-2. Edit ImageContentSourcePolicy and add the new mirror
+3. Edit ImageContentSourcePolicy and add the new mirror
 ```
 oc edit ImageContentSourcePolicy image-policy-0
 
