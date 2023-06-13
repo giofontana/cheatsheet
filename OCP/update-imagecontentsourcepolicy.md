@@ -53,7 +53,7 @@ spec:
 
 ```
 
-File /etc/containers/registries.conf is updated automatically:
+**Result:** File /etc/containers/registries.conf is updated automatically:
 
 ```
 [core@ip-10-0-139-196 ~]$ cat /etc/containers/registries.conf
