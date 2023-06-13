@@ -1,9 +1,11 @@
 
-DO NOT RUN THE FOLLOWING WITH ROOT USER!
+# Using oc mirror to mirror repositories to Quay for air-gapped OCP installation
+
+* In a RHEL box run the following (DO NOT RUN THE FOLLOWING WITH ROOT USER!)
 
 ```bash
 QUAY_HOST=quay-public.sandbox1829.opentlc.com
-dnf install jq
+dnf install jq podman wget -y
 cat ./pull-secret.txt | jq . > ./pull-secret.json
 podman login $QUAY_HOST
 cat ./pull-secret.json # COPY CONTENT
@@ -11,22 +13,22 @@ cat ./pull-secret.json # COPY CONTENT
 vi $XDG_RUNTIME_DIR/containers/auth.json # PASTE CONTENT HERE BETWEEN BRACKETS
 ```
 
-Test it using the following command:
+* Test it using the following command:
 
 ```
 podman login registry.redhat.io
 ```
 
-Should see the following output:
+* You should see the following output:
 
 ```
-# podman login registry.redhat.io
+$ podman login registry.redhat.io
 Authenticating with existing credentials for registry.redhat.io
 Existing credentials are valid. Already logged in to registry.redhat.io
 
 ```
 
-Run oc mirror init:
+* Run oc mirror init:
 
 ```bash
 wget https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/stable/openshift-client-linux.tar.gz
@@ -43,11 +45,22 @@ oc mirror help
 oc mirror init --registry $QUAY_HOST/openshift/oc-mirror-metadata > imageset-config.yaml 
 ```
 
-Edit the file imageset-config.yaml with your changes. Examples: https://github.com/openshift/oc-mirror/tree/main/docs/examples
+* Edit the file imageset-config.yaml with your changes. Examples: https://github.com/openshift/oc-mirror/tree/main/docs/examples
 
-Run the mirror:
+* Run the mirror:
 
 ```
 oc mirror --config=./imageset-config.yaml \
   docker://$QUAY_HOST/openshift
 ```
+
+* After finish run the following to the the ImageContentSourcePolicy:
+
+```
+cat oc-mirror-workspace/results-1686609747/imageContentSourcePolicy.yaml
+```
+
+## References:
+
+https://cloud.redhat.com/blog/mirroring-openshift-registries-the-easy-way
+https://github.com/openshift/oc-mirror/tree/main/docs/examples

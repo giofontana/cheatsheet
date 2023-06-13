@@ -3,6 +3,9 @@
 * Run the following commands in a RHEL 8 VM:
 
 ```bash
+sudo dnf install podman -y
+sudo podman login registry.redhat.io
+
 export QUAY=/opt/quay
 mkdir -p $QUAY/postgres-quay
 setfacl -m u:26:-wx $QUAY/postgres-quay
@@ -27,10 +30,12 @@ sudo podman run --rm -it --name quay_config -p 80:8080 -p 443:8443 registry.redh
 
 * Log into config web page using credentials below:
 
+```
 username: quayconfig
 password: secret
+```
 
-NOTE: If needed use the letsencrypt procedure in ../RHEL/letsencrypt-certificate.md to create a let's encrypt certificate to use with Quay.
+**NOTE**: If needed use the letsencrypt procedure in ../RHEL/letsencrypt-certificate.md to create a let's encrypt certificate to use with Quay.
 
 * Follow the instructions as stated here: https://access.redhat.com/documentation/en-us/red_hat_quay/3.8/html-single/deploy_red_hat_quay_for_proof-of-concept_non-production_purposes/index#poc-configuring-quay
 
@@ -38,7 +43,7 @@ NOTE: If needed use the letsencrypt procedure in ../RHEL/letsencrypt-certificate
 
 ```bash
 mkdir $QUAY/config
-cp ~/Downloads/quay-config.tar.gz ~/config
+cp ~/Downloads/quay-config.tar.gz $QUAY/config/
 cd $QUAY/config
 tar xvf quay-config.tar.gz
 mkdir $QUAY/storage
