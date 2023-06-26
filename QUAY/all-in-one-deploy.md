@@ -7,8 +7,8 @@ sudo dnf install podman -y
 sudo podman login registry.redhat.io
 
 export QUAY=/opt/quay
-mkdir -p $QUAY/postgres-quay
-setfacl -m u:26:-wx $QUAY/postgres-quay
+sudo mkdir -p $QUAY/postgres-quay
+sudo setfacl -m u:26:-wx $QUAY/postgres-quay
 
 sudo podman run -d --rm --name postgresql-quay \
   -e POSTGRESQL_USER=quayuser \
@@ -42,12 +42,12 @@ password: secret
 * Prepare Quay configuration:
 
 ```bash
-mkdir $QUAY/config
-cp ~/Downloads/quay-config.tar.gz $QUAY/config/
+sudo mkdir $QUAY/config
+sudo cp /home/ec2-user/quay-config.tar.gz $QUAY/config/
 cd $QUAY/config
-tar xvf quay-config.tar.gz
-mkdir $QUAY/storage
-setfacl -m u:1001:-wx $QUAY/storage
+sudo tar xvf quay-config.tar.gz
+sudo mkdir $QUAY/storage
+sudo setfacl -m u:1001:-wx $QUAY/storage
 ```
 
 * Run it:
