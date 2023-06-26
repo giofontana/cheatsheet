@@ -4,6 +4,6 @@
 ```bash
 sudo dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm -y
 sudo dnf install certbot python3-certbot-apache -y
-certbot --version
-certbot certonly --standalone
+sudo certbot --version
+sudo certbot certonly --standalone
 ```
