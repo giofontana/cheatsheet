@@ -5,7 +5,7 @@
 
 ```bash
 QUAY_HOST=quay-public.sandbox1829.opentlc.com
-dnf install jq podman wget -y
+sudo dnf install jq podman wget -y
 cat ./pull-secret.txt | jq . > ./pull-secret.json
 podman login $QUAY_HOST
 cat ./pull-secret.json # COPY CONTENT

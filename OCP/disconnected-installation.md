@@ -10,6 +10,7 @@
 * Commands:
 
 ```bash
+wget https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/stable/openshift-install-linux.tar.gz
 ./openshift-install create install-config --dir ocp-install
 # Define install-config (example below)
 ./openshift-install create cluster --dir ocp-install/ --log-level=debug
