@@ -10,7 +10,22 @@
 * Commands:
 
 ```bash
-wget https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/stable/openshift-install-linux.tar.gz
+sudo -i
+export SQUID_IP=10.0.10.14
+echo "http_proxy=http://10.0.10.14:3128/" > /etc/environment
+echo "https_proxy=http://10.0.10.14:3128/" >> /etc/environment
+echo "no_proxy=.opentlc.com" >> /etc/environment
+exit
+
+source /etc/environment
+sudo dnf install tmux wget -y
+export OCP_VERSION=4.11.43
+wget https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/$OCP_VERSION/openshift-install-linux.tar.gz
+tar xvzf openshift-install-linux.tar.gz
+mkdir ocp-install
+ssh-keygen -t ed25519 -N '' -f ocp-key
+tmux new
+./openshift-install version
 ./openshift-install create install-config --dir ocp-install
 # Define install-config (example below)
 ./openshift-install create cluster --dir ocp-install/ --log-level=debug
@@ -22,9 +37,11 @@ wget https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/stable/ope
 apiVersion: v1
 baseDomain: sandbox1829.opentlc.com
 publish: Internal
+credentialsMode: Mint
 proxy:
-  httpProxy: http://10.0.11.251:3128
-  httpsProxy: http://10.0.11.251:3128
+  httpProxy: http://$SQUID_IP:3128
+  httpsProxy: http://$SQUID_IP:3128
+  noProxy: .sandbox1416.opentlc.com
 compute:
 - architecture: amd64
   hyperthreading: Enabled
@@ -65,7 +82,7 @@ networking:
   - cidr: 10.128.0.0/14
     hostPrefix: 23
   machineNetwork:
-  - cidr: 10.0.128.0/20
+  - cidr: 10.0.0.0/16
   networkType: OpenShiftSDN
   serviceNetwork:
   - 172.30.0.0/16
