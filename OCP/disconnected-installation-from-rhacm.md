@@ -20,6 +20,8 @@ controlPlane:
         size: 100
         type: io1
       type: m5.xlarge
+      zones:
+      - us-east-2a
 compute:
   - name: worker
     hyperthreading: Enabled
@@ -31,6 +33,8 @@ compute:
           size: 100
           type: io1
         type: m5.xlarge
+        zones:
+        - us-east-2a
 networking:
   networkType: OpenShiftSDN
   clusterNetwork:
