@@ -3,7 +3,7 @@
   * Create a VPC with a public and private subnet
   * On public subnet use the ../QUAY/all-in-one-deploy.md to deploy a quay instance
   * Use this procedure to mirror OCP images: QUAY/mirror-ocp-repos.md
-  * On quay install squid as a proxy server, instructions here: ../RHEL/install-squid-proxy.md
+  * On quay or a bastion host install squid as a proxy server, instructions here: ../RHEL/install-squid-proxy.md
   * Deploy a bastion (RHEL 8) on private subnet
   * Run the installation using quay as the image registry and also proxy
 
@@ -14,7 +14,6 @@ sudo -i
 export SQUID_IP=10.0.10.14
 echo "http_proxy=http://10.0.10.14:3128/" > /etc/environment
 echo "https_proxy=http://10.0.10.14:3128/" >> /etc/environment
-echo "no_proxy=.opentlc.com" >> /etc/environment
 exit
 
 source /etc/environment
@@ -41,7 +40,6 @@ credentialsMode: Mint
 proxy:
   httpProxy: http://$SQUID_IP:3128
   httpsProxy: http://$SQUID_IP:3128
-  noProxy: .sandbox1416.opentlc.com
 compute:
 - architecture: amd64
   hyperthreading: Enabled
