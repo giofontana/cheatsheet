@@ -1,5 +1,5 @@
 
-# Sample of install-config and ACM manifests for disconnected installation
+# Sample of install-config and ACM manifests for disconnected
 
 ```yaml
 apiVersion: v1
@@ -37,7 +37,7 @@ networking:
     - cidr: 10.128.0.0/14
       hostPrefix: 23
   machineNetwork:
-    - cidr: 10.0.128.0/23
+    - cidr: 10.0.0.0/16
   serviceNetwork:
     - 172.30.0.0/16
 platform:
@@ -48,6 +48,10 @@ platform:
 publish: Internal
 pullSecret: ''
 sshKey: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEx/GI**************
+additionalTrustBundle: |-
+  -----BEGIN CERTIFICATE-----
+  **************
+  -----END CERTIFICATE-----
 imageContentSources:
   - mirrors:
       - quay-local-quay-openshift-operators.apps.rhacm.sandbox1416.opentlc.com/openshift/openshift/release-images
@@ -79,10 +83,6 @@ imageContentSources:
   - mirrors:
       - quay-local-quay-openshift-operators.apps.rhacm.sandbox1416.opentlc.com/openshift/rhacm2
     source: registry.redhat.io/rhacm2
-additionalTrustBundle: |-
-  -----BEGIN CERTIFICATE-----
-  **************
-  -----END CERTIFICATE-----
 ```
 
 
