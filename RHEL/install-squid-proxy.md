@@ -11,6 +11,7 @@ cat <<EOF > /etc/squid/whitelist.txt
 .openshift.com
 .aws
 .amazonaws.com
+.opentlc.com
 EOF
 
 cat <<EOF > /etc/squid/squid.conf
