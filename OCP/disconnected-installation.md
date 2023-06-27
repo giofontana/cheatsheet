@@ -30,6 +30,14 @@ tmux new
 ./openshift-install create cluster --dir ocp-install/ --log-level=debug
 ```
 
+After installed, disable openshift-marketplace default:
+
+```bash
+oc patch OperatorHub cluster --type json \
+    -p '[{"op": "add", "path": "/spec/disableAllDefaultSources", "value": true}]'
+```
+
+
 * Example of install-config for a disconnected installation:
 
 ```yaml

@@ -1,0 +1,20 @@
+kind: ImageSetConfiguration
+apiVersion: mirror.openshift.io/v1alpha2
+storageConfig:
+  registry:
+    imageURL: quayfd.sandbox1416.opentlc.com/openshift/oc-mirror-metadata
+    skipTLS: false
+mirror:
+  platform:
+    channels:
+    - name: stable-4.11
+      type: ocp
+  operators:
+  - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.11
+    packages:
+    - name: quay-operator
+    - name: advanced-cluster-management
+    - name: multicluster-engine      
+    - name: odf-operator
+  additionalImages: []
+  helm: {}

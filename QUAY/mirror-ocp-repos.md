@@ -60,7 +60,16 @@ oc mirror --config=./imageset-config.yaml \
 cat oc-mirror-workspace/results-1686609747/imageContentSourcePolicy.yaml
 ```
 
+## Useful commands:
+
+```bash
+oc mirror list operators --catalog registry.redhat.io/redhat/redhat-operator-index:v4.11
+oc mirror list operators --package rhacs-operator --catalog registry.redhat.io/redhat/redhat-operator-index:v4.11
+```
+
+
 ## References:
 
 https://cloud.redhat.com/blog/mirroring-openshift-registries-the-easy-way
 https://github.com/openshift/oc-mirror/tree/main/docs/examples
+
