@@ -1,5 +1,6 @@
 # INITIAL SETUP
 
+```
 telnet 10.0.0.1
 
 enable
@@ -22,7 +23,7 @@ do show run
 exit
 
 write mem
-
+```
 
 
 https://community.cisco.com/t5/networking-knowledge-base/webcast-vip-slides-ios-upgrade-on-catalyst-switches-2900-3500/ta-p/3165049?attachment-id=13952
