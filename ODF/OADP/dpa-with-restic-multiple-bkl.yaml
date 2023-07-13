@@ -1,0 +1,54 @@
+apiVersion: oadp.openshift.io/v1alpha1
+kind: DataProtectionApplication
+metadata:
+  name: dpa-with-restic
+  namespace: openshift-adp
+spec:
+  backupLocations:
+    - velero:
+        config:
+          insecureSkipTLSVerify: 'true'
+          profile: default
+          region: localstorage
+          s3ForcePathStyle: 'true'
+          s3Url: 'https://s3-openshift-storage.apps.ocp2.sandbox1728.opentlc.com'
+        credential:
+          key: cloud
+          name: cloud-credentials
+        default: true
+        objectStorage:
+          bucket: oadp-bucket-a09e8fab-83de-4dcf-8726-9df611a10169
+          prefix: velero
+        provider: aws
+    - velero:
+        config:
+          insecureSkipTLSVerify: 'true'
+          profile: default
+          region: localstorage
+          s3ForcePathStyle: 'true'
+          s3Url: >-
+            https://s3-openshift-storage.apps.cluster-kqpxf.kqpxf.sandbox1728.opentlc.com
+        credential:
+          key: cloud
+          name: cloud-credentials-ocp2
+        default: true
+        objectStorage:
+          bucket: oadp-bucket-e654141c-5c92-4d91-94c2-e377c87307fd
+          prefix: velero
+        provider: aws
+  configuration:
+    restic:
+      enable: true
+    velero:
+      defaultPlugins:
+        - openshift
+        - aws
+        - csi
+      featureFlags:
+        - EnableCSI
+  snapshotLocations:
+    - velero:
+        config:
+          profile: default
+          region: localstorage
+        provider: aws

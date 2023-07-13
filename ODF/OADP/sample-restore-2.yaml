@@ -1,0 +1,14 @@
+apiVersion: velero.io/v1
+kind: Restore
+metadata:
+  name: restore-backup-pgsql-1-2
+  namespace: openshift-adp
+spec:
+  backupName: backup-pgsql
+  includedNamespaces:
+    - pgsql-sample
+  includedResources:
+    - replicationcontroller
+    - deploymentconfig
+    - templateinstances.template.openshift.io
+  restorePVs: true

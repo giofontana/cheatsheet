@@ -1,0 +1,9 @@
+apiVersion: velero.io/v1
+kind: Backup
+metadata:
+  namespace: openshift-adp
+  name: backup-pgsql
+spec:
+  defaultVolumesToRestic: true
+  includedNamespaces:
+    - pgsql-sample
