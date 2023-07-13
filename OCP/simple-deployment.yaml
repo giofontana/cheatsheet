@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: test-oadp
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pv-claim-oadp-test
+  namespace: test-oadp
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test
+  namespace: test-oadp
+  labels:
+    app: test
+spec:
+  selector:
+    matchLabels:
+      app: test
+  template:
+    metadata:
+      labels:
+        app: test
+    spec:
+      containers:
+      - image: registry.access.redhat.com/ubi8/ubi:latest
+        name: myapp-container
+        command: [ "/bin/bash", "-c", "--" ]
+        args: [ "while true; do sleep 30; done;" ]
+        volumeMounts:
+          - mountPath: "/volume"
+            name: pv-storage-oadp-test 
+      volumes:
+      - name: pv-storage-oadp-test
+        persistentVolumeClaim:
+          claimName: pv-claim-oadp-test
