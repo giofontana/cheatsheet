@@ -1,14 +1,14 @@
 apiVersion: velero.io/v1
 kind: Restore
 metadata:
-  name: restore-backup-pgsql
+  name: rocket-chat-1
   namespace: openshift-adp
 spec:
-  backupName: backup-pgsql
+  backupName: rocketchat-1
   excludedResources:
     - replicationcontroller
     - deploymentconfig
     - templateinstances.template.openshift.io
   includedNamespaces:
-    - pgsql-sample
+    - rocketchat
   restorePVs: true

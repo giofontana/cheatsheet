@@ -1,0 +1,10 @@
+apiVersion: velero.io/v1
+kind: Restore
+metadata:
+  name: restore-backup-pgsql
+  namespace: openshift-adp
+spec:
+  backupName: backup-1
+  includedNamespaces:
+    - test-oadp
+  restorePVs: true
