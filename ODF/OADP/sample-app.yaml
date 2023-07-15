@@ -9,6 +9,7 @@ metadata:
   name: pv-claim-oadp-test
   namespace: test-oadp
 spec:
+  storageClassName: "ocs-storagecluster-ceph-rbd"
   accessModes:
     - ReadWriteOnce
   resources:
