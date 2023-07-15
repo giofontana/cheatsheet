@@ -27,9 +27,9 @@ On Cluster B:
 
 # Useful links:
 
-Volume Backup/restore with restic via OADP operator v1.0 does not preserve data: https://access.redhat.com/solutions/6946011
-OpenShift APIs for Data Protection (OADP) FAQ: https://access.redhat.com/articles/5456281
-Backup and Recovery with OpenShift APIs for Data Protection (OADP): https://www.opensourcerers.org/2021/05/10/backup-and-recovery-with-openshift-apis-for-data-protection-oadp/
+* Volume Backup/restore with restic via OADP operator v1.0 does not preserve data: https://access.redhat.com/solutions/6946011
+* OpenShift APIs for Data Protection (OADP) FAQ: https://access.redhat.com/articles/5456281
+* Backup and Recovery with OpenShift APIs for Data Protection (OADP): https://www.opensourcerers.org/2021/05/10/backup-and-recovery-with-openshift-apis-for-data-protection-oadp/
 
 # To check S3:
 
