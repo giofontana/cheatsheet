@@ -47,31 +47,28 @@ metadata:
   name: rocketchat-db
   labels:
     app: rocketchat-db
-  namespace: rocketchat
+  namespace: rocket-chat
 spec:
   replicas: 1
   selector:
     app: rocketchat-db
   strategy:
     type: Recreate
+    recreateParams:
+      post:
+        failurePolicy: ignore
+        execNewPod:
+          containerName: rocketchat-db
+          command:
+            - /bin/sh
+            - -c
+            - "sleep 60 && mongo rocket-chat-db:27017 --eval \"rs.initiate({_id: 'rs0', members: [{_id:0, host:'localhost:27017'}]})\""
   template:
     metadata:
       labels:
         app: rocketchat-db
     spec:
       containers:
-        - name: rocketchat-db-init
-          image: docker.io/mongo:4.0
-          command:
-            - /bin/sh
-            - -c
-            - "sleep 60 && mongo rocket-chat-db:27017 --eval \"rs.initiate({_id: 'rs0', members: [{_id:0, host:'localhost:27017'}]})\""
-          volumeMounts:
-            - name: rocketchat-data-vol
-              mountPath: /data/db
-          ports:
-            - containerPort: 27017
-              protocol: TCP
         - name: rocketchat-db
           image: docker.io/mongo:4.0
           command:
