@@ -47,7 +47,7 @@ metadata:
   name: rocketchat-db
   labels:
     app: rocketchat-db
-  namespace: rocket-chat
+  namespace: rocketchat
 spec:
   replicas: 1
   selector:
