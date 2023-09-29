@@ -9,14 +9,14 @@ cat << EOF | oc apply -f -
 apiVersion: nmstate.io/v1alpha1
 kind: NodeNetworkConfigurationPolicy
 metadata:
-  name: br1-enp2s0-policy-workers
+  name: br1-eno2-policy-workers
 spec:
   nodeSelector:
     node-role.kubernetes.io/worker: ""
   desiredState:
     interfaces:
       - name: br1
-        description: Linux bridge with enp2s0 as a port
+        description: Linux bridge with eno2 as a port
         type: linux-bridge
         state: up
         ipv4:
@@ -26,7 +26,7 @@ spec:
             stp:
               enabled: false
           port:
-            - name: enp2s0
+            - name: eno2
 EOF
 
 # NodeNetworkConfigurationPolicy
