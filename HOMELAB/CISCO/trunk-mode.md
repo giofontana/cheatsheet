@@ -11,3 +11,36 @@ show interfaces interface-id trunk
 copy running-config startup-config
 write mem
 ```
+
+Create the VLANs for management and VMs:
+
+```
+configure terminal
+vlan 10
+name Management
+exit
+vlan 20
+name VMs
+exit
+end
+write mem
+```
+Assign VLANs to Ports:
+```
+configure terminal
+interface range Gi1/0/37-50
+switchport access vlan 30
+exit
+end
+write mem
+```
+
+Configure Trunk Port for pfSense:
+```
+interface Gi1/0/1
+switchport mode trunk
+switchport trunk allowed vlan 1,10,20,30
+exit
+end
+write mem
+```
