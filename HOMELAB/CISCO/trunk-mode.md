@@ -12,19 +12,6 @@ copy running-config startup-config
 write mem
 ```
 
-Create the VLANs for management and VMs:
-
-```
-configure terminal
-vlan 10
-name Management
-exit
-vlan 20
-name VMs
-exit
-end
-write mem
-```
 Assign VLANs to Ports:
 ```
 configure terminal
