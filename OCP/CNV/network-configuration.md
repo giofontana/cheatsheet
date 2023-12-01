@@ -60,4 +60,6 @@ spec:
 EOF
 ```
 
-Reference: https://github.com/rdoxenham/openshift-virt-labs/blob/master/docs/workshop/content/network-setup.md
+References: 
+* https://github.com/rdoxenham/openshift-virt-labs/blob/master/docs/workshop/content/network-setup.md
+* https://github.com/k8snetworkplumbingwg/multus-cni/blob/master/docs/how-to-use.md
