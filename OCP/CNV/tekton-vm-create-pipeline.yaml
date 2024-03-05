@@ -1,0 +1,127 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: vm-create-pipeline
+  namespace: vms-pipeline
+spec:
+  tasks:
+    - name: create-vm-from-manifest
+      params:
+        - name: manifest
+          value: |-
+            apiVersion: kubevirt.io/v1
+            kind: VirtualMachine
+            metadata:
+              name: fedora-sample-pipeline
+              namespace: vms-pipeline
+            spec:
+              dataVolumeTemplates:
+                - apiVersion: cdi.kubevirt.io/v1beta1
+                  kind: DataVolume
+                  metadata:
+                    creationTimestamp: null
+                    name: fedora-sample-pipeline
+                  spec:
+                    sourceRef:
+                      kind: DataSource
+                      name: fedora
+                      namespace: openshift-virtualization-os-images
+                    storage:
+                      resources:
+                        requests:
+                          storage: 30Gi
+              running: true
+              template:
+                metadata:
+                  annotations:
+                    vm.kubevirt.io/flavor: small
+                    vm.kubevirt.io/os: fedora
+                    vm.kubevirt.io/workload: server
+                  creationTimestamp: null
+                  labels:
+                    kubevirt.io/domain: fedora-sample-pipeline
+                    kubevirt.io/size: small
+                spec:
+                  accessCredentials:
+                    - sshPublicKey:
+                        propagationMethod:
+                          configDrive: {}
+                        source:
+                          secret:
+                            secretName: vm-ssh-key.pub
+                  architecture: amd64
+                  domain:
+                    cpu:
+                      cores: 1
+                      sockets: 1
+                      threads: 1
+                    devices:
+                      disks:
+                        - disk:
+                            bus: virtio
+                          name: rootdisk
+                        - disk:
+                            bus: virtio
+                          name: cloudinitdisk
+                      interfaces:
+                        - masquerade: {}
+                          name: default
+                      networkInterfaceMultiqueue: true
+                      rng: {}
+                    features:
+                      acpi: {}
+                      smm:
+                        enabled: true
+                    firmware:
+                      bootloader:
+                        efi: {}
+                    machine:
+                      type: pc-q35-rhel9.2.0
+                    memory:
+                      guest: 2Gi
+                    resources: {}
+                  networks:
+                    - name: default
+                      pod: {}
+                  terminationGracePeriodSeconds: 180
+                  volumes:
+                    - dataVolume:
+                        name: fedora-sample-pipeline
+                      name: rootdisk
+                    - cloudInitConfigDrive:
+                        userData: |-
+                          #cloud-config
+                          user: fedora
+                          password: fedora
+                          chpasswd: { expire: False }
+                      name: cloudinitdisk
+        - name: virtctl
+          value: ''
+        - name: namespace
+          value: vms-pipeline
+        - name: startVM
+          value: 'true'
+        - name: runStrategy
+          value: ''
+      runAfter:
+        - generate-ssh-keys
+      taskRef:
+        kind: Task
+        name: create-vm-from-manifest
+    - name: generate-ssh-keys
+      params:
+        - name: publicKeySecretName
+          value: vm-ssh-key.pub
+        - name: publicKeySecretNamespace
+          value: vms-pipeline
+        - name: privateKeySecretName
+          value: vm-ssh-key
+        - name: privateKeySecretNamespace
+          value: vms-pipeline
+        - name: privateKeyConnectionOptions
+          value: []
+        - name: additionalSSHKeygenOptions
+          value: ''
+      taskRef:
+        kind: Task
+        name: generate-ssh-keys
