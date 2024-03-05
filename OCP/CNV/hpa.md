@@ -1,0 +1,118 @@
+
+
+apiVersion: pool.kubevirt.io/v1alpha1
+kind: VirtualMachinePool
+metadata:
+  name: vm-pool-apache
+  namespace: vms-hpa
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      kubevirt.io/vmpool: vm-pool-apache
+  virtualMachineTemplate:
+    metadata:
+      labels:
+        kubevirt.io/vmpool: vm-pool-apache
+    spec:
+      dataVolumeTemplates:
+        - metadata:
+            creationTimestamp: null
+            name: fedora-1
+          spec:
+            preallocation: false
+            sourceRef:
+              kind: DataSource
+              name: fedora
+              namespace: openshift-virtualization-os-images
+            storage:
+              resources:
+                requests:
+                  storage: 30Gi
+              storageClassName: ocs-storagecluster-ceph-rbd-virtualization
+      running: true
+      template:
+        metadata:
+          annotations:
+            vm.kubevirt.io/flavor: small
+            vm.kubevirt.io/os: fedora
+            vm.kubevirt.io/workload: server
+          creationTimestamp: null
+          labels:
+            app: vms-hpa
+            kubevirt.io/domain: fedora-1
+            kubevirt.io/size: small
+        spec:
+          architecture: amd64
+          domain:
+            cpu:
+              cores: 2
+              sockets: 1
+              threads: 1
+            devices:
+              disks:
+                - bootOrder: 1
+                  disk:
+                    bus: virtio
+                  name: rootdisk
+                - bootOrder: 2
+                  disk:
+                    bus: virtio
+                  name: cloudinitdisk
+              interfaces:
+                - name: default
+                  masquerade: {}
+              networkInterfaceMultiqueue: true
+              rng: {}
+            features:
+              acpi: {}
+              smm:
+                enabled: true
+            firmware:
+              bootloader:
+                efi: {}
+            machine:
+              type: pc-q35-rhel9.2.0
+            memory:
+              guest: 4Gi
+            resources: {}
+          networks:
+            - name: default
+              pod: {}
+          terminationGracePeriodSeconds: 180
+          volumes:
+            - dataVolume:
+                name: fedora-1
+              name: rootdisk
+            - cloudInitConfigDrive:
+                userData: |-
+                  #cloud-config
+                  user: fedora
+                  password: fedora
+                  chpasswd: { expire: False }
+                  bootcmd:
+                    - "sudo yum install httpd -y"
+                    - "sudo systemctl enable httpd.service --now"
+                    - "sudo echo \"Hey, I am VM $(hostname)!\" > /var/www/html/index.html"
+              name: cloudinitdisk
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: vm-pool-apache-hpa
+  namespace: vms-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: pool.kubevirt.io/v1alpha1
+    kind: VirtualMachinePool
+    name: vm-pool-apache
+  minReplicas: 2
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          averageUtilization: 20
+          type: Utilization
+
