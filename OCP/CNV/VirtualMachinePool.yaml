@@ -1,12 +1,11 @@
-
-
+---
 apiVersion: pool.kubevirt.io/v1alpha1
 kind: VirtualMachinePool
 metadata:
   name: vm-pool-apache
   namespace: vms-hpa
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       kubevirt.io/vmpool: vm-pool-apache
@@ -46,7 +45,7 @@ spec:
           architecture: amd64
           domain:
             cpu:
-              cores: 2
+              cores: 1
               sockets: 1
               threads: 1
             devices:
@@ -74,7 +73,7 @@ spec:
             machine:
               type: pc-q35-rhel9.2.0
             memory:
-              guest: 4Gi
+              guest: 1Gi
             resources: {}
           networks:
             - name: default
@@ -95,24 +94,3 @@ spec:
                     - "sudo systemctl enable httpd.service --now"
                     - "sudo echo \"Hey, I am VM $(hostname)!\" > /var/www/html/index.html"
               name: cloudinitdisk
----
-apiVersion: autoscaling/v2
-kind: HorizontalPodAutoscaler
-metadata:
-  name: vm-pool-apache-hpa
-  namespace: vms-hpa
-spec:
-  scaleTargetRef:
-    apiVersion: pool.kubevirt.io/v1alpha1
-    kind: VirtualMachinePool
-    name: vm-pool-apache
-  minReplicas: 2
-  maxReplicas: 5
-  metrics:
-    - type: Resource
-      resource:
-        name: cpu
-        target:
-          averageUtilization: 20
-          type: Utilization
-
