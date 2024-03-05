@@ -9,7 +9,7 @@ metadata:
     os.template.kubevirt.io/fedora: 'true'
   namespace: vms-loadbalancer
 spec:
-  running: false
+  running: true
   template:
     metadata:
       annotations:
@@ -50,7 +50,6 @@ spec:
           type: q35
         memory:
           guest: 2Gi
-      hostname: example
       networks:
         - name: default
           pod: {}
