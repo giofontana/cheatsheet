@@ -1,0 +1,37 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: test-net
+  namespace: network-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: name
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: name
+# uncomment to test multus net
+#      annotations:
+#        k8s.v1.cni.cncf.io/networks: replication-network-vlan-4
+    spec:
+# uncomment to test specific nodes
+#      nodeSelector:
+#        kubernetes.io/hostname: marge.simpsons.lab.gfontana.me
+      containers:
+        - name: web
+          image: registry.redhat.io/openshift4/network-tools-rhel9
+          command:
+            - /bin/bash
+            - '-c'
+            - '--'
+          args:
+            - while true; do sleep 30; done;
+# uncomment to get elevated priviledges and change this like route tables
+#          securityContext:   
+#            capabilities:
+#              add:
+#              - NET_ADMIN
+#              - NET_RAW
