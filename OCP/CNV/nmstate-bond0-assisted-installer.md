@@ -3,7 +3,9 @@
 
 Use this yaml on Assisted Installer to deploy nodes using bonds:
 
-**Note**: Requires LACP/MLAG - Other modes supported are: balance-xor, and active-backup
+**Notes**: 
+1. Requires LACP/MLAG - Other modes supported are: balance-xor, and active-backup
+2. This example uses static IP with VLAN. See here examples wiht DHCP: https://docs.openshift.com/container-platform/4.8/networking/k8s_nmstate/k8s-nmstate-updating-node-network-config.html#virt-creating-interface-on-nodes_k8s_nmstate-updating-node-network-config
 
 ```yaml
 interfaces:
