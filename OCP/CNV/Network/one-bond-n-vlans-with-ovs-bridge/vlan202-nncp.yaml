@@ -1,0 +1,34 @@
+apiVersion: nmstate.io/v1
+kind: NodeNetworkConfigurationPolicy
+metadata:
+  name: vlan202-bond0
+spec:
+  desiredState:
+    interfaces:
+      - description: vlan202 using bond0
+        ipv4:
+          enabled: false
+        name: bond0.202
+        state: up
+        type: vlan
+        vlan:
+          base-iface: bond0
+          id: 4
+      - bridge:
+          allow-extra-patch-ports: true
+          options:
+            stp:
+              enabled: false
+          port:
+            - name: bond0.202
+        description: Bridge on VLAN202 using bond0
+        ipv4:
+          enabled: false
+        name: br-202
+        state: up
+        type: ovs-bridge
+    ovn:
+      bridge-mappings:
+        - bridge: br-202
+          localnet: ovs-bridge-vlan202
+          state: present
