@@ -3,6 +3,9 @@ kind: NodeNetworkConfigurationPolicy
 metadata:
   name: vlan200-bond0
 spec:
+#  nodeSelector:
+#    node-role.kubernetes.io/worker: ''
+#    kubernetes.io/hostname: node-name
   desiredState:
     interfaces:
       - description: vlan200 using bond0
