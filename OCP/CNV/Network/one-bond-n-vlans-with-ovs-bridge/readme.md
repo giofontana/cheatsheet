@@ -6,6 +6,8 @@ These files will configure an OpenShift cluster with the following configuration
   <img src="imgs/vm-network.png" alt="VM Network" width="1000">
 </div>
 
+## Procedure
+
 **1. Apply the NNCP files and make sure it got created. Important: Set node selectors if you don't want to apply it in the entire cluster.**
 
 ![NNCP working](imgs/nncp.png)
