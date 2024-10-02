@@ -8,11 +8,11 @@ These files will configure an OpenShift cluster with the following configuration
 
 ## Procedure
 
-**1. Apply the NNCP files and make sure it got created. Important: Set node selectors if you don't want to apply it in the entire cluster.**
+**1. Apply the NNCP files (`vlanXXX-nncp.yaml`) and make sure it got created. Important: Set node selectors if you don't want to apply it in the entire cluster.**
 
 ![NNCP working](imgs/nncp.png)
 
-**2. Apply the NAD files:**
+**2. Apply the NAD files (`ovs-bridge-vlanXXX-nad.yaml`):**
 
 ![NAP](imgs/nad.png)
 
