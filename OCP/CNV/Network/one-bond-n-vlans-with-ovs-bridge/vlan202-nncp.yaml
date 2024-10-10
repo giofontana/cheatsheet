@@ -16,7 +16,7 @@ spec:
         type: vlan
         vlan:
           base-iface: bond0
-          id: 4
+          id: 202
       - bridge:
           allow-extra-patch-ports: true
           options:
