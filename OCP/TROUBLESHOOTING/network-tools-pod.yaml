@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: network-tools
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: network-tools
+  template:
+    metadata:
+      labels:
+        app: network-tools
+    spec:
+      containers:
+      - name: network-tools
+        image: quay.io/openshift/origin-network-tools:latest
+        command: ["/bin/sh", "-c", "while true; do sleep 3600; done"]
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
