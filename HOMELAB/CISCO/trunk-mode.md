@@ -31,3 +31,14 @@ exit
 end
 write mem
 ```
+
+Trunk with native VLAN:
+```
+interface <interface-id>
+ switchport mode trunk
+ switchport trunk native vlan 3
+ switchport trunk allowed vlan all
+exit
+end
+write mem
+```
