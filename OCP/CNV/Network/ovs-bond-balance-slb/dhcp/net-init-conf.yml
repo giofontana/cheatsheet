@@ -1,0 +1,16 @@
+interfaces:
+  - name: eno1
+    type: ethernet
+    state: up
+    ipv4:
+      dhcp: true
+      enabled: true
+    ipv6:
+      enabled: false
+  - name: eno2
+    type: ethernet
+    state: up
+    ipv4:
+      enabled: false
+    ipv6:
+      enabled: false

@@ -1,0 +1,37 @@
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  labels:
+    machineconfiguration.openshift.io/role: master
+  name: 05-nmstate-configuration-master
+spec:
+  config:
+    ignition:
+      version: 3.2.0
+    storage:
+      files:
+      - contents:
+          source: data:text/plain;charset=utf-8;base64,IyEvYmluL2Jhc2gKc2V0IC1ldXgKCiMgQ2xlYW4gdXAgb2xkIGNvbmZpZyBvbiBiZWhhbGYgb2YgbXR1LW1pZ3JhdGlvbgppZiAhIHN5c3RlbWN0bCAtcSBpcy1lbmFibGVkIG10dS1taWdyYXRpb247IHRoZW4KICBlY2hvICJDbGVhbmluZyB1cCBsZWZ0IG92ZXIgbXR1IG1pZ3JhdGlvbiBjb25maWd1cmF0aW9uIgogIHJtIC1yZiAvZXRjL2Nuby9tdHUtbWlncmF0aW9uCmZpCgppZiBbIC1lIC9ldGMvbm1zdGF0ZS9vcGVuc2hpZnQvYXBwbGllZCBdOyB0aGVuCiAgZWNobyAiQ29uZmlndXJhdGlvbiBhbHJlYWR5IGFwcGxpZWQsIGV4aXRpbmciCiAgZXhpdCAwCmZpCgpzcmNfcGF0aD0iL2V0Yy9ubXN0YXRlL29wZW5zaGlmdCIKZHN0X3BhdGg9Ii9ldGMvbm1zdGF0ZSIKaG9zdG5hbWU9JChob3N0bmFtZSAtcykKaG9zdF9maWxlPSIke2hvc3RuYW1lfS55bWwiCmNsdXN0ZXJfZmlsZT0iY2x1c3Rlci55bWwiCmNvbmZpZ19maWxlPSIiCmlmIFsgLXMgIiRzcmNfcGF0aC8kaG9zdF9maWxlIiBdOyB0aGVuCiAgY29uZmlnX2ZpbGU9JGhvc3RfZmlsZQplbGlmIFsgLXMgIiRzcmNfcGF0aC8kY2x1c3Rlcl9maWxlIiBdOyB0aGVuCiAgY29uZmlnX2ZpbGU9JGNsdXN0ZXJfZmlsZQplbHNlCiAgZWNobyAiTm8gY29uZmlndXJhdGlvbiBmb3VuZCBhdCAkc3JjX3BhdGgvJGhvc3RfZmlsZSBvciAkc3JjX3BhdGgvJGNsdXN0ZXJfZmlsZSIKICBleGl0IDAKZmkKCmlmIFsgLWUgIiRkc3RfcGF0aC8kY29uZmlnX2ZpbGUiIF07IHRoZW4KICBlY2hvICJFUlJPUjogRmlsZSAkZHN0X3BhdGgvJGNvbmZpZ19maWxlIGV4aXN0cy4gUmVmdXNpbmcgdG8gb3ZlcndyaXRlLiIKICBleGl0IDEKZmkKCmNwICIkc3JjX3BhdGgvJGNvbmZpZ19maWxlIiAvZXRjL25tc3RhdGUKdG91Y2ggL2V0Yy9ubXN0YXRlL29wZW5zaGlmdC9hcHBsaWVk
+        mode: 0755
+        overwrite: true
+        path: /usr/local/bin/nmstate-configuration.sh
+    systemd:
+      units:
+      - contents: |
+          [Unit]
+          Description=Applies per-node NMState network configuration
+          Requires=openvswitch.service
+          Wants=NetworkManager-wait-online.service
+          After=NetworkManager-wait-online.service openvswitch.service network.service nodeip-configuration.service
+          Before=nmstate.service kubelet-dependencies.target ovs-configuration.service node-valid-hostname.service
+
+          [Service]
+          Type=oneshot
+          ExecStart=/usr/local/bin/nmstate-configuration.sh
+          StandardOutput=journal+console
+          StandardError=journal+console
+
+          [Install]
+          WantedBy=network-online.target
+        enabled: true
+        name: nmstate-configuration.service

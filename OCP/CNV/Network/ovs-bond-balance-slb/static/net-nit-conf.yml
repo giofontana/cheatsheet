@@ -1,0 +1,23 @@
+interfaces:
+  - name: eno1
+    type: ethernet
+    state: up
+    ipv4:
+      address: 
+      - ip: CHANGE_ME
+        prefix-length: 24
+      enabled: true
+  - name: eno2
+    type: ethernet
+    state: up
+    ipv4:
+      enabled: false
+dns-resolver:
+  config:
+    server:
+      - CHANGE_ME
+routes:
+  config:
+    - destination: 0.0.0.0/0
+      next-hop-address: CHANGE_ME
+      next-hop-interface: eno1
