@@ -7,7 +7,7 @@
 2. Use the network static configuration, setting NIC 1 only to have an IP and disabling IPV4 and IPV6 on NIC 2. Additionally, make sure to appropriately rename the interfaces (eno1, eno2). Use [net-init-conf](dhcp/net-init-conf.yml) (DHCP) or [net-init-conf](static/net-init-conf.yml) (Static IP).
 3. Proceed with the installation as usual. At the `Custom manifests` step, create the following manifests. Use **openshift** as the folder.
 
-    3.1. Add (common/05-nmstate-configuration-master.yaml)[05-nmstate-configuration-master.yaml] and (common/05-nmstate-configuration-worker)[05-nmstate-configuration-worker]
+    3.1. Add [05-nmstate-configuration-master.yaml](common/05-nmstate-configuration-master.yaml) and [05-nmstate-configuration-worker](common/05-nmstate-configuration-worker)
 
     3.2. In a linux workstation, run the following command to generate `10-br-ex-master-mc.yml` and `10-br-ex-worker-mc.yml` machine config files and add them as custom manifests.
 
