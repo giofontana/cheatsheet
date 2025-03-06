@@ -31,11 +31,6 @@ spec:
         overwrite: true
         path: /etc/NetworkManager/conf.d/00-server.conf
       - contents:
-          source: data:text/plain;charset=utf-8;base64,$RETRY
-        mode: 0644
-        overwrite: true
-        path: /etc/NetworkManager/dispatcher.d/pre-up.d/10-retry-activate-bond-slaves.sh
-      - contents:
           source: data:text/plain;charset=utf-8;base64,$CLUSTER
         mode: 0644
         overwrite: true
