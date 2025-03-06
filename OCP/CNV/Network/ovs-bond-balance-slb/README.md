@@ -3,7 +3,7 @@
 
 **Deployment procedure with Assisted Installer**
 
-1. Install the cluster with Assisted Installer as usual, but enable the option “Include custom manifests” and “Static network configuration”.
+1. Install the cluster with Assisted Installer as usual, but enable the option `Include custom manifests` and `Static network configuration`.
 2. Use the network static configuration, setting NIC 1 only to have an IP and disabling IPV4 and IPV6 on NIC 2. Additionally, make sure to appropriately rename the interfaces (eno1, eno2). Use [net-init-conf](dhcp/net-init-conf.yml) (DHCP) or [net-init-conf](static/net-init-conf.yml) (Static IP).
 3. Proceed with the installation as usual. At the `Custom manifests` step, create the following manifests. Use **openshift** as the folder.
 
