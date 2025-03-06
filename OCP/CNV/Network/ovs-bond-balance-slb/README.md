@@ -1,8 +1,13 @@
 
 
-1. Run the following command to generate machine config files:
 
-DHCP:
+1. Install the cluster with Assisted Installer as usual, but enable the option “Include custom manifests” and “Static network configuration”.
+2. Use the network static configuration, setting NIC 1 only to have an IP and disabling IPV4 and IPV6 on NIC 2. Additionally, make sure to appropriately rename the interfaces (eno1, eno2). Use [net-init-conf](dhcp/net-init-conf.yml) or [net-init-conf](static/net-init-conf.yml)
+3. Proceed with the installation as usual. At the `Custom manifests` step, create the following manifests. Use openshift as the folder.
+
+3.1. Run the following command to generate 10-br-ex-master-mc.yml and 10-br-ex-worker-mc.yml machine config files:
+
+**DHCP:**
 
 ```
 CLUSTER=$(cat dhcp/cluster.yml | base64 -w0)
@@ -37,7 +42,7 @@ spec:
 EOF
 ```
 
-STATIC IP:
+**STATIC IP:**
 
 ```
 MASTER1=$(cat static/master1.yml | base64 -w0)
@@ -120,3 +125,6 @@ spec:
 EOF
 ```
 
+3.2. Also add (common/05-nmstate-configuration-master.yaml)[05-nmstate-configuration-master.yaml] and (common/05-nmstate-configuration-worker)[05-nmstate-configuration-worker]
+
+4. Click on Install cluster.
