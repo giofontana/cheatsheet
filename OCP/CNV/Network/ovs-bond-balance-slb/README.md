@@ -6,7 +6,6 @@ DHCP:
 
 ```
 CLUSTER=$(cat dhcp/cluster.yml | base64 -w0)
-RETRY=$(cat common/10-retry-activate-bond-slaves.sh | base64 -w0)
 
 cat <<EOF > 10-br-ex-master-mc.yml
 apiVersion: machineconfiguration.openshift.io/v1
