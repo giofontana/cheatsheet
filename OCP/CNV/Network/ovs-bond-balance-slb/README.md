@@ -29,7 +29,7 @@ This procedure deploys OpenShift with the following architecture.
 
     3.1. Add [05-nmstate-configuration-master.yaml](common/05-nmstate-configuration-master.yaml) and [05-nmstate-configuration-worker](common/05-nmstate-configuration-worker)
 
-    3.2. In a linux workstation, customize [dhcp/cluster.yml](dhcp/cluster.yml) for DHCP or [static/(server).yml](static/master1.yml) for static IP and run the following commands to generate `10-br-ex-master-mc.yml` and `10-br-ex-worker-mc.yml` machine config files and add them as custom manifests. Note that, for static IP, the file names have to be the server short name (example: if server name is `server1.example.com`, so the file name has to be `server1.yml`).
+    3.2. In a linux workstation, customize [dhcp/cluster.yml](dhcp/cluster.yml) for DHCP or [static/(server).yml](static/master1.yml) for static IP and run the following commands to generate `10-br-ex-master-mc.yml` and `10-br-ex-worker-mc.yml` machine config files and add them as custom manifests. Note that, for static IP the file names have to be the server short name (example: if server name is `server1.example.com`, so the file name has to be `server1.yml`).
 
 **DHCP:**
 
@@ -43,6 +43,35 @@ metadata:
   labels:
     machineconfiguration.openshift.io/role: master
   name: 10-br-ex-master
+spec:
+  config:
+    ignition:
+      version: 3.2.0
+    storage:
+      directories:
+      - path: /run/nodeip-configuration
+        mode: 0755
+        overwrite: true
+      files:
+      - contents:
+          source: data:text/plain;charset=utf-8;base64,IyBUaGlzIGNvbmZpZ3VyYXRpb24gZmlsZSBjaGFuZ2VzIE5ldHdvcmtNYW5hZ2VyJ3MgYmVoYXZpb3IgdG8KIyB3aGF0J3MgZXhwZWN0ZWQgb24gInRyYWRpdGlvbmFsIFVOSVggc2VydmVyIiB0eXBlIGRlcGxveW1lbnRzLgojCiMgU2VlICJtYW4gTmV0d29ya01hbmFnZXIuY29uZiIgZm9yIG1vcmUgaW5mb3JtYXRpb24gYWJvdXQgdGhlc2UKIyBhbmQgb3RoZXIga2V5cy4KClttYWluXQojIERvIG5vdCBkbyBhdXRvbWF0aWMgKERIQ1AvU0xBQUMpIGNvbmZpZ3VyYXRpb24gb24gZXRoZXJuZXQgZGV2aWNlcwojIHdpdGggbm8gb3RoZXIgbWF0Y2hpbmcgY29ubmVjdGlvbnMuCm5vLWF1dG8tZGVmYXVsdD0qCgojIElnbm9yZSB0aGUgY2FycmllciAoY2FibGUgcGx1Z2dlZCBpbikgc3RhdGUgd2hlbiBhdHRlbXB0aW5nIHRvCiMgYWN0aXZhdGUgc3RhdGljLUlQIGNvbm5lY3Rpb25zLgppZ25vcmUtY2Fycmllcj0qCg==
+        mode: 0644
+        overwrite: true
+        path: /etc/NetworkManager/conf.d/00-server.conf
+      - contents:
+          source: data:text/plain;charset=utf-8;base64,$CLUSTER
+        mode: 0644
+        overwrite: true
+        path: /etc/nmstate/openshift/cluster.yml
+EOF
+
+cat <<EOF > 10-br-ex-worker-mc.yml
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  labels:
+    machineconfiguration.openshift.io/role: worker
+  name: 10-br-ex-worker
 spec:
   config:
     ignition:
