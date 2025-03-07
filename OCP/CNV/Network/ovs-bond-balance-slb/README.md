@@ -7,9 +7,6 @@ This procedure deploys OpenShift with the following architecture.
 
 <center><img src="imgs/diagram.png" alt="OVS Balance-slb Architecture" title="OVS Balance-slb Architecture" style="width:50%; height:auto;"></center>
 
-<img src="/giofontana/cheatsheet/raw/main/OCP/CNV/Network/ovs-bond-balance-slb/imgs/01.png" alt="Assited Installer" title="Check option Include custom manifests and Static network configuration" style="max-width: 100%;">
-
-
 ## Deployment procedure with Assisted Installer
 
 *Tested with OpenShift 4.17.18 and 4.18.1*
