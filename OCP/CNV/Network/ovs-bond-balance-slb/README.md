@@ -1,17 +1,30 @@
 
 # OpenShift Bond with No Switch Configuration (OVS-based balance-slb) 
 
-**Deployment procedure with Assisted Installer**
+## Architecture
+
+This procedure deploys OpenShift with the following architecture.
+
+<center><img src="imgs/diagram.png" alt="OVS Balance-slb Architecture" title="OVS Balance-slb Architecture" style="width:50%; height:auto;"></center>
+
+<img src="/giofontana/cheatsheet/raw/main/OCP/CNV/Network/ovs-bond-balance-slb/imgs/01.png" alt="Assited Installer" title="Check option Include custom manifests and Static network configuration" style="max-width: 100%;">
+
+
+## Deployment procedure with Assisted Installer
 
 *Tested with OpenShift 4.17.18 and 4.18.1*
 
 1. Install the cluster with Assisted Installer as usual, but enable the option `Include custom manifests` and `Static network configuration`.
 
-![Assited Installer](imgs/01.png "Check option Include custom manifests and Static network configuration")
+<center>
+<img src="imgs/01.png" alt="Assited Installer" title="Check option Include custom manifests and Static network configuration" style="max-width: 100%;">
+</center>
 
 2. Use the network static configuration, setting NIC 1 only to have an IP and disabling IPV4 and IPV6 on NIC 2. Additionally, make sure to appropriately rename the interfaces (eno1, eno2). Use [net-init-conf for DHCP](dhcp/net-init-conf.yml) or [net-init-conf for static IP](static/net-init-conf.yml).
 
-![Static network configuration](imgs/02.png "Set interfaces with second NIC with IP disabled.")
+<center>
+<img src="imgs/02.png" alt="Static network configuration" title="Set interfaces with second NIC with IP disabled." style="max-width: 100%;">
+</center>
 
 3. Proceed with the installation as usual. At the `Custom manifests` step, create the following manifests. Use **openshift** as the folder.
 
@@ -137,6 +150,6 @@ spec:
 EOF
 ```
 
-![Add MachineConfigs](imgs/03.png "Add MachineConfigs. Use openshift folder.")
+<center><img src="imgs/03.png" alt="Add MachineConfigs" title="Add MachineConfigs. Use openshift folder." style="max-width: 100%;"></center>
 
 4. Click on Install cluster.
