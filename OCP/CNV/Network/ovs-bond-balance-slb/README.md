@@ -17,7 +17,7 @@
 
     3.1. Add [05-nmstate-configuration-master.yaml](common/05-nmstate-configuration-master.yaml) and [05-nmstate-configuration-worker](common/05-nmstate-configuration-worker)
 
-    3.2. In a linux workstation, run the following command to generate `10-br-ex-master-mc.yml` and `10-br-ex-worker-mc.yml` machine config files and add them as custom manifests.
+    3.2. In a linux workstation, customize [dhcp/cluster.yml](dhcp/cluster.yml) for DHCP or [static/(server).yml](static/master1.yml) for static IP and run the following commands to generate `10-br-ex-master-mc.yml` and `10-br-ex-worker-mc.yml` machine config files and add them as custom manifests. Note that, for static IP, the file names have to be the server short name (example: if server name is `server1.example.com`, so the file name has to be `server1.yml`).
 
 **DHCP:**
 
