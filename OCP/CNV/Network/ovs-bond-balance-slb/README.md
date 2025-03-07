@@ -6,7 +6,13 @@
 *Tested with OpenShift 4.17.18 and 4.18.1*
 
 1. Install the cluster with Assisted Installer as usual, but enable the option `Include custom manifests` and `Static network configuration`.
+
+![Assited Installer](imgs/01.png "Check option Include custom manifests and Static network configuration")
+
 2. Use the network static configuration, setting NIC 1 only to have an IP and disabling IPV4 and IPV6 on NIC 2. Additionally, make sure to appropriately rename the interfaces (eno1, eno2). Use [net-init-conf for DHCP](dhcp/net-init-conf.yml) or [net-init-conf for static IP](static/net-init-conf.yml).
+
+![Static network configuration](imgs/02.png "Set interfaces with second NIC with IP disabled.")
+
 3. Proceed with the installation as usual. At the `Custom manifests` step, create the following manifests. Use **openshift** as the folder.
 
     3.1. Add [05-nmstate-configuration-master.yaml](common/05-nmstate-configuration-master.yaml) and [05-nmstate-configuration-worker](common/05-nmstate-configuration-worker)
@@ -130,5 +136,7 @@ spec:
         path: /etc/nmstate/openshift/worker2.yml # IMPORTANT: Use the node's short hostname here
 EOF
 ```
+
+![Add MachineConfigs](imgs/03.png "Add MachineConfigs. Use openshift folder.")
 
 4. Click on Install cluster.
