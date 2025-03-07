@@ -5,7 +5,9 @@
 
 This procedure deploys OpenShift with the following architecture.
 
-<center><img src="imgs/diagram.png" alt="OVS Balance-slb Architecture" title="OVS Balance-slb Architecture" style="width:50%; height:auto;"></center>
+<center>
+<img src="imgs/diagram.png" alt="OVS Balance-slb Architecture" title="OVS Balance-slb Architecture" style="width:50%; height:auto;">
+</center>
 
 ## Deployment procedure with Assisted Installer
 
