@@ -19,10 +19,12 @@ interfaces:
   - name: br-ex
     type: ovs-interface
     state: up
+    mtu: 9000
     copy-mac-from: eno1
     ipv4:
       enabled: true
       dhcp: true
+      auto-route-metric: 48
     ipv6:
       enabled: false
       dhcp: false
@@ -58,7 +60,7 @@ interfaces:
   - name: eno1
     type: ethernet
     state: up
-#    mtu: 9000
+    mtu: 9000
     ipv4:
       enabled: false
     ipv6:
@@ -66,8 +68,18 @@ interfaces:
   - name: eno2
     type: ethernet
     state: up
-#    mtu: 9000
+    mtu: 9000
     ipv4:
       enabled: false
     ipv6:
       enabled: false
+dns-resolver:
+  config:
+    server:
+      - 10.0.1.1
+      - 10.0.1.2
+routes:
+  config:
+    - destination: 0.0.0.0/0
+      next-hop-address: 10.0.1.1
+      next-hop-interface: br-ex
