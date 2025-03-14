@@ -23,7 +23,7 @@ desiredState:
     - name: br-ex
       type: ovs-interface
       state: up
-      mtu: 9000
+#      mtu: 9000
       copy-mac-from: "{{ capture.primary-nic.interfaces.0.name }}"
       ipv4:
         enabled: true
@@ -61,36 +61,3 @@ desiredState:
       state: up
       patch:
         peer: patch-ex-to-phy
-    - name: "{{ capture.primary-nic.interfaces.0.name }}"
-      description: primary
-      type: ethernet
-      state: up
-      identifier: mac-address
-      mac-address: "{{ capture.primary-nic.interfaces.0.mac-address }}"
-      mtu: 9000
-      ipv4:
-        enabled: false
-      ipv6:
-        enabled: false
-    - name: "{{ capture.secondary-nic.interfaces.0.name }}"
-      description: secondary
-      type: ethernet
-      state: up
-      identifier: mac-address
-      mac-address: "{{ capture.secondary-nic.interfaces.0.mac-address }}"      
-      mtu: 9000
-      ipv4:
-        enabled: false
-      ipv6:
-        enabled: false
-  dns-resolver:
-    config:
-      server:
-        - 10.0.1.1
-        - 10.0.1.2
-  routes:
-    config:
-      - destination: 0.0.0.0/0
-        next-hop-address: 10.0.1.1
-        next-hop-interface: br-ex
-  

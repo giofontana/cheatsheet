@@ -1,15 +1,19 @@
 interfaces:
   - name: eno1
+    description: primary  
     type: ethernet
     state: up
+#    mtu: 9000
     ipv4:
       address: 
       - ip: CHANGE_ME
         prefix-length: 24
       enabled: true
   - name: eno2
+    description: secondary  
     type: ethernet
     state: up
+#    mtu: 9000
     ipv4:
       enabled: false
 dns-resolver:
