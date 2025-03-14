@@ -1,6 +1,6 @@
 capture:
-  ethernets: interfaces.type=="ethernet"
-  ethernets-up: capture.ethernets.interfaces.state=="up"
+  primary-nic: interfaces.description == "primary"
+  secondary-nic: interfaces.description == "secondary"
 desiredState:
   interfaces:
     - name: br-ex
@@ -49,8 +49,8 @@ desiredState:
           link-aggregation:
             mode: balance-slb
             port:
-            - name: "{{ capture.ethernets-up.interfaces.0.name }}"
-            - name: "{{ capture.ethernets-up.interfaces.1.name }}"
+            - name: "{{ capture.primary-nic.interfaces.0.name }}"
+            - name: "{{ capture.secondary-nic.interfaces.0.name }}"
     - name: patch-ex-to-phy
       type: ovs-interface
       state: up
@@ -61,21 +61,21 @@ desiredState:
       state: up
       patch:
         peer: patch-ex-to-phy
-    - name: "{{ capture.ethernets-up.interfaces.0.name }}"
+    - name: "{{ capture.primary-nic.interfaces.0.name }}"
       type: ethernet
       state: up
       identifier: mac-address
-      mac-address: "{{ capture.ethernets-up.interfaces.0.mac-address }}"
+      mac-address: "{{ capture.primary-nic.interfaces.0.mac-address }}"
       mtu: 9000
       ipv4:
         enabled: false
       ipv6:
         enabled: false
-    - name: "{{ capture.ethernets-up.interfaces.1.name }}"
+    - name: "{{ capture.secondary-nic.interfaces.0.name }}"
       type: ethernet
       state: up
       identifier: mac-address
-      mac-address: "{{ capture.ethernets-up.interfaces.1.mac-address }}"      
+      mac-address: "{{ capture.secondary-nic.interfaces.0.mac-address }}"      
       mtu: 9000
       ipv4:
         enabled: false
