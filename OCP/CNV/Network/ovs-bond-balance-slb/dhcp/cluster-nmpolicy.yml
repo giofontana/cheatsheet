@@ -24,7 +24,7 @@ desiredState:
       type: ovs-interface
       state: up
       mtu: 9000
-      copy-mac-from: eno1
+      copy-mac-from: "{{ capture.primary-nic.interfaces.0.name }}"
       ipv4:
         enabled: true
         dhcp: true
