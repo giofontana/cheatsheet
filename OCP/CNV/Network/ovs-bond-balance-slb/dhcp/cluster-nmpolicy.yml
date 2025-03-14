@@ -62,6 +62,7 @@ desiredState:
       patch:
         peer: patch-ex-to-phy
     - name: "{{ capture.primary-nic.interfaces.0.name }}"
+      description: primary
       type: ethernet
       state: up
       identifier: mac-address
@@ -72,6 +73,7 @@ desiredState:
       ipv6:
         enabled: false
     - name: "{{ capture.secondary-nic.interfaces.0.name }}"
+      description: secondary
       type: ethernet
       state: up
       identifier: mac-address
