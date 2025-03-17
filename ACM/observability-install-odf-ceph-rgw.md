@@ -59,5 +59,6 @@ thanos.yaml: |
 ```         
 
 References:
+* https://docs.redhat.com/en/documentation/red_hat_advanced_cluster_management_for_kubernetes/2.12/html/observability/observing-environments-intro#enabling-observability
 * https://docs.redhat.com/en/documentation/red_hat_openshift_data_foundation/4.18/html/managing_hybrid_and_multicloud_resources/using-tls-certificates-for-applications-accessing-rgw_rhodf#using-tls-certificates-for-applications-accessing-rgw_rhodf
 * https://docs.redhat.com/en/documentation/red_hat_advanced_cluster_management_for_kubernetes/2.12/html/observability/observing-environments-intro#customizing-certificates-object-store
