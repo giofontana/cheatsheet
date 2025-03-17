@@ -57,3 +57,7 @@ thanos.yaml: |
          ca_file: /etc/ceph/certs/ca.crt
          insecure_skip_verify: false
 ```         
+
+References:
+* https://docs.redhat.com/en/documentation/red_hat_openshift_data_foundation/4.18/html/managing_hybrid_and_multicloud_resources/using-tls-certificates-for-applications-accessing-rgw_rhodf#using-tls-certificates-for-applications-accessing-rgw_rhodf
+* https://docs.redhat.com/en/documentation/red_hat_advanced_cluster_management_for_kubernetes/2.12/html/observability/observing-environments-intro#customizing-certificates-object-store
