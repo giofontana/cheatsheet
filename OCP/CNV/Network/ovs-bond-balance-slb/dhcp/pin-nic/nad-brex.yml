@@ -1,0 +1,15 @@
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  name: vlan4
+  namespace: default
+spec:
+  config: '{ 
+    "name":"vlan4", 
+    "type":"ovn-k8s-cni-overlay", 
+    "cniVersion":"0.4.0", 
+    "physicalNetworkName":"trunk", 
+    "vlanId": 4, 
+    "topology":"localnet", 
+    "netAttachDefName":"default/vlan4" 
+    }'

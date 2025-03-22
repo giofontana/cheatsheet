@@ -1,0 +1,14 @@
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  name: eno1vlan1
+  namespace: default
+spec:
+  config: '{ 
+    "name":"eno1vlan1", 
+    "type":"ovn-k8s-cni-overlay", 
+    "cniVersion":"0.4.0", 
+    "physicalNetworkName":"localneteno1", 
+    "vlanId": 1, 
+    "topology":"localnet", 
+    "netAttachDefName":"default/eno1vlan1" }'

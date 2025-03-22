@@ -1,0 +1,11 @@
+apiVersion: nmstate.io/v1
+kind: NodeNetworkConfigurationPolicy
+metadata:
+  name: localneteno1
+spec:
+  desiredState:
+    ovn:
+      bridge-mappings:
+        - bridge: br-eno1
+          localnet: localneteno1
+          state: present
