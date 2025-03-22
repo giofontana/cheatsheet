@@ -1,0 +1,105 @@
+capture:
+  primary-nic: interfaces.description == "primary"
+  secondary-nic: interfaces.description == "secondary"
+desiredState:
+  interfaces:
+    - name: br-eno1
+      type: ovs-bridge
+      profile-name: br-eno1-br
+      state: up
+      identifier: name
+      bridge:
+        port:
+        - name: patch-eno1-to-phy
+        - name: "{{ capture.primary-nic.interfaces.0.name }}"
+    - name: br-eno2
+      type: ovs-bridge
+      profile-name: br-eno2-br
+      state: up
+      identifier: name
+      bridge:
+        port:
+        - name: patch-eno2-to-phy
+        - name: "{{ capture.secondary-nic.interfaces.0.name }}"
+    - name: patch-phy-to-eno1
+      type: ovs-interface
+      state: up
+      controller: br-phy
+      patch:
+        peer: patch-eno1-to-phy
+    - name: patch-phy-to-eno2
+      type: ovs-interface
+      state: up
+      controller: br-phy
+      patch:
+        peer: patch-eno2-to-phy
+    - name: patch-eno1-to-phy
+      type: ovs-interface
+      state: up
+      controller: br-eno1
+      patch:
+        peer: patch-phy-to-eno1
+    - name: patch-eno2-to-phy
+      type: ovs-interface
+      state: up
+      controller: br-eno2
+      patch:
+        peer: patch-phy-to-eno2        
+    - name: br-ex
+      type: ovs-bridge
+      state: up
+      ipv4:
+        enabled: false
+        dhcp: false
+      ipv6:
+        enabled: false
+        dhcp: false
+      bridge:
+        allow-extra-patch-ports: true
+        port:
+        - name: br-ex
+        - name: patch-ex-to-phy
+      ovs-db:
+        external_ids:
+          bridge-uplink: "patch-ex-to-phy"
+    - name: br-ex
+      type: ovs-interface
+      state: up
+#      mtu: 9000
+      copy-mac-from: "{{ capture.primary-nic.interfaces.0.name }}"
+      ipv4:
+        enabled: true
+        dhcp: true
+        auto-route-metric: 48
+      ipv6:
+        enabled: false
+        dhcp: false
+    - name: br-phy
+      type: ovs-bridge
+      state: up
+      ipv4:
+        enabled: false
+        dhcp: false
+      ipv6:
+        enabled: false
+        dhcp: false
+      bridge:
+        allow-extra-patch-ports: true
+        port:
+        - name: patch-phy-to-ex
+        - name: ovs-bond
+          link-aggregation:
+            mode: balance-slb
+            port:
+            - name: patch-phy-to-eno1
+            - name: patch-phy-to-eno2
+    - name: patch-ex-to-phy
+      type: ovs-interface
+      state: up
+      patch:
+        peer: patch-phy-to-ex
+    - name: patch-phy-to-ex
+      type: ovs-interface
+      state: up
+      patch:
+        peer: patch-ex-to-phy
