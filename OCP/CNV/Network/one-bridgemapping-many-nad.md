@@ -19,7 +19,7 @@ spec:
           state: present
 ```
 
-On NAD use the `physicalNetworkName` with same name used at `spec.desiredState.ovn.bridge-mappings[].localnet` (#1)
+On NAD use the `physicalNetworkName` (#2) with same name used at `spec.desiredState.ovn.bridge-mappings[].localnet` (#1)
 
 ```
 apiVersion: k8s.cni.cncf.io/v1
