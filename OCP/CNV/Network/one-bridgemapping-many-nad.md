@@ -19,7 +19,7 @@ spec:
           state: present
 ```
 
-On NAD use the `physicalNetworkName` with same name used at `spec.desiredState.ovn.bridge-mappings[].localnet`
+On NAD use the `physicalNetworkName` with same name used at `spec.desiredState.ovn.bridge-mappings[].localnet` (#1)
 
 ```
 apiVersion: k8s.cni.cncf.io/v1
@@ -39,7 +39,7 @@ spec:
     }'
 ```
 
-Values `#1` and `#2` needs to match.
+Values `#1` and `#2` need to match.
 
 More examples:
 
