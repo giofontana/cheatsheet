@@ -36,6 +36,7 @@ EOF
 4. Build image:
 
 ```
+podman login registry.redhat.io
 ansible-builder build --tag <registry>/<user>/openshift_installer_ee
 ```
 
