@@ -5,7 +5,7 @@
 2. Install ansible-builder
 
 ```
-sudo dnf install python3-pip python3 -m pip install ansible-builder --user
+sudo dnf install python3-pip python3 && pip install ansible-builder --user
 ```
 
 3. Create execution-environment.yml
