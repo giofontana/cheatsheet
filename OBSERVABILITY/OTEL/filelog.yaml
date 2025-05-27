@@ -165,10 +165,18 @@ spec:
             from: attributes.uid
             to: resource["k8s.pod.uid"]
     exporters:
-      debug:
-        verbosity: detailed
+      otlp:
+        endpoint: otel-receiver-collector.observability.svc.cluster.local:4317
+        tls:
+          ca_file: ca.pem
+          cert_file: cert.pem
+          key_file: key.pem
+          insecure: false
+          insecure_skip_verify: false
+        headers:
+          X-Scope-OrgID: "dev"
     service:
       pipelines:
         logs:
           receivers: [filelog]
-          exporters: [debug]
+          exporters: [otlp]

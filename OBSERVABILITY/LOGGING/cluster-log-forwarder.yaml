@@ -1,3 +1,5 @@
+# https://github.com/openshift/cluster-logging-operator/blob/master/docs/features/logforwarding/outputs/otlp-forwarding.adoc
+
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -46,15 +48,28 @@ roleRef:
 apiVersion: observability.openshift.io/v1
 kind: ClusterLogForwarder
 metadata:
+#  annotations:
+#    observability.openshift.io/tech-preview-otlp-output: "enabled"
   name: logging
   namespace: openshift-logging
 spec:
   managementState: Managed
   outputs:
     - loki:
-        url: 'http://<host/ip>:3100'
+        url: 'http://3.129.40.240:3100'
       name: logging-loki
       type: loki
+    - name: otlp
+      type: otlp
+      tls:
+        insecureSkipVerify: true
+#      otlp:
+#        authentication:
+#          token:
+#            from: serviceAccount
+#        tuning:
+#          compression: gzip
+#        url: 'http://otel-receiver-collector.observability.svc.cluster.local:4318/v1/logs'
   pipelines:
     - inputRefs:
         - application
@@ -63,5 +78,13 @@ spec:
       name: logs-to-loki
       outputRefs:
         - logging-loki
+#    - inputRefs:
+#      - application
+#      - infrastructure
+#      - audit
+#      name: otlp-logs
+#      outputRefs:
+#      - otlp        
   serviceAccount:
     name: log-collector
+

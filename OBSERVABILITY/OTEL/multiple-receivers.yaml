@@ -181,7 +181,7 @@ metadata:
   namespace: observability
 spec:
   serviceAccount: otel
-  mode: deployment  
+  mode: daemonset  
   securityContext:
     allowPrivilegeEscalation: false
     capabilities:
@@ -265,6 +265,17 @@ spec:
     exporters:
       debug:
         verbosity: detailed
+#      otlp:
+#        endpoint: <otlp-endpoint>:4317
+#        tls:
+#          ca_file: ca.pem
+#          cert_file: cert.pem
+#          key_file: key.pem
+#          insecure: false
+#          insecure_skip_verify: false
+#        headers:
+#          X-Scope-OrgID: "dev"
+
     service:
       pipelines:
         metrics:
@@ -275,6 +286,7 @@ spec:
           processors: []
           exporters:
             - debug
+            #- otlp
         logs:
           receivers:
             - k8sobjects
@@ -283,12 +295,14 @@ spec:
           processors: []
           exporters:
             - debug   
+            #- otlp
         logs/entity_events:
           receivers:
             - k8s_cluster
           processors: []
           exporters:
-            - debug           
+            - debug    
+            #- otlp       
   env:
     - name: K8S_NODE_NAME
       valueFrom:
