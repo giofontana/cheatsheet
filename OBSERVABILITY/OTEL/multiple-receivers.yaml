@@ -223,29 +223,30 @@ spec:
   config:
     receivers:
       hostmetrics:
-        #collection_interval: 10s
+        collection_interval: 60s
         initial_delay: 1s
         root_path: /
         scrapers: 
           cpu: {}
           memory: {}
           disk: {}
+# cpu, disk, load, filesystem, memory, network, paging, processes, and process          
       k8sobjects:
         auth_type: serviceAccount
         objects:
           - name: pods
             mode: pull 
-            #interval: 30s
+            interval: 60s
           - name: events
             mode: watch
       kubeletstats:
-        #collection_interval: 20s
+        collection_interval: 60s
         auth_type: "serviceAccount"
         endpoint: "https://${env:K8S_NODE_NAME}:10250"
         insecure_skip_verify: true
       k8s_cluster:
         distribution: openshift
-        #collection_interval: 10s        
+        collection_interval: 60s        
       journald:
         files: /var/log/journal/*/*
         priority: info 
@@ -258,8 +259,8 @@ spec:
         retry_on_failure:
           enabled: true
           initial_interval: 1s
-          max_interval: 30s
-          max_elapsed_time: 5m               
+          max_interval: 60s
+          max_elapsed_time: 5m
       k8s_events:
         #namespaces: [project1, project2]
     exporters:
