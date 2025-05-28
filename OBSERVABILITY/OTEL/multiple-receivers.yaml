@@ -1,7 +1,7 @@
 kind: Namespace
 apiVersion: v1
 metadata:
-  name: observability
+  name: otel-o11y
   labels:
     security.openshift.io/scc.podSecurityLabelSync: "false"
     pod-security.kubernetes.io/enforce: "privileged"
@@ -12,13 +12,13 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: otel
-  namespace: observability
+  namespace: otel-o11y
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: otel-collector
-  namespace: observability
+  namespace: otel-o11y
 rules:
 - apiGroups:
   - "events.k8s.io"
@@ -105,7 +105,7 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: otel
-    namespace: observability
+    namespace: otel-o11y
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -118,7 +118,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: otel
-  namespace: observability 
+  namespace: otel-o11y 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -131,14 +131,14 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: otel
-    namespace: observability
+    namespace: otel-o11y
 ---
 apiVersion: security.openshift.io/v1
 kind: SecurityContextConstraints
 metadata:
   name: otel-scc
 users:
-- system:serviceaccount:observability:otel
+- system:serviceaccount:otel-o11y:otel
 
 allowHostDirVolumePlugin: true
 allowHostIPC: false
@@ -170,7 +170,7 @@ kind: ConfigMap
 apiVersion: v1
 metadata:
   name: cabundle
-  namespce: observability
+  namespace: otel-o11y
   annotations:
     service.beta.openshift.io/inject-cabundle: "true"
 ---
@@ -178,7 +178,7 @@ apiVersion: opentelemetry.io/v1beta1
 kind: OpenTelemetryCollector
 metadata:
   name: otel
-  namespace: observability
+  namespace: otel-o11y
 spec:
   serviceAccount: otel
   mode: daemonset  
