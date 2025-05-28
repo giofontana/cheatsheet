@@ -245,7 +245,7 @@ spec:
         insecure_skip_verify: true
       k8s_cluster:
         distribution: openshift
-        collection_interval: 10s        
+        #collection_interval: 10s        
       journald:
         files: /var/log/journal/*/*
         priority: info 
