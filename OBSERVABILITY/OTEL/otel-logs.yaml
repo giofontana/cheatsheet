@@ -117,14 +117,14 @@ spec:
           processors: []
           exporters:
             - debug   
-            #- otlp
+            #- otlphttp
         logs/entity_events:
           receivers:
             - k8s_cluster
           processors: []
           exporters:
             - debug    
-            #- otlp       
+            #- otlphttp       
   env:
     - name: K8S_NODE_NAME
       valueFrom:
