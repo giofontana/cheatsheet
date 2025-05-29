@@ -89,7 +89,7 @@ spec:
         insecure_skip_verify: true
       k8s_cluster:
         distribution: openshift
-        collection_interval: 60s                
+        collection_interval: 60s
     exporters:
       debug:
         verbosity: detailed
