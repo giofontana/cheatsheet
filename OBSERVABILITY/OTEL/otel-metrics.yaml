@@ -64,7 +64,10 @@ spec:
               - from: resource_attribute
                 name: k8s.pod.uid
           - sources:
-              - from: connection  
+              - from: connection
+      resourcedetection:
+        detectors: [openshift]
+        override: true              
     receivers:
       hostmetrics:
         collection_interval: 60s
@@ -110,6 +113,7 @@ spec:
             - k8s_cluster
           processors:
             - k8sattributes
+            - resourcedetection
           exporters:
             - debug
             #- otlphttp
