@@ -42,3 +42,15 @@ Finding hash:
 # sudo ovs-appctl bond/hash 'xx:yy:zz:12:15:58'
 77
 ```
+
+## For Bridge Mappings
+
+```
+ovs-vsctl get Open_vSwitch . external_ids:ovn-bridge-mappings
+ovn-nbctl list logical_switch_port | grep network_name -A10 -B10
+
+# When a new bridge-mapping is created for instance for br-ex, you will see a new mapping, example:
+# $ ovs-vsctl get Open_vSwitch . external_ids:ovn-bridge-mappings
+# "physnet:br-ex,trunk:br-ex"
+```
+
