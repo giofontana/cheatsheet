@@ -21,3 +21,9 @@ etc_dnsmasq_d = true ### CHANGED, default = false
 vi /etc/dnsmasq.d/ocp-wildcard.conf
 address=/apps.ocp.<domain>/<vip>
 ```
+
+4. Restart Pihole
+
+```
+systemctl restart pihole-FTL.service
+```
