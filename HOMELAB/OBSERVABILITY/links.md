@@ -13,3 +13,5 @@ PFSense dashboard using InfluxDB: https://angrysysadmins.tech/index.php/2020/04/
 Influx/Telegraf Token: https://docs.influxdata.com/influxdb/v1/administration/authentication_and_authorization/#generate-your-jwt-token
 
 Grafana dashboard for IDRAC: https://grafana.com/grafana/dashboards/12106-idrac-host-stats/
+
+Grafana dashboard for HAProxy: https://grafana.com/grafana/dashboards/12693-haproxy/
