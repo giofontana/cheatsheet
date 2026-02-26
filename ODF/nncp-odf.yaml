@@ -1,0 +1,52 @@
+apiVersion: nmstate.io/v1
+kind: NodeNetworkConfigurationPolicy
+metadata:
+  name: odf-<node-name>
+spec:
+  desiredState:
+    interfaces:
+      - description: Interface for VLAN 101 (ODF Public Network)
+        ipv4:
+          enabled: false
+        ipv6:
+          enabled: false
+        name: bond0.101
+        state: up
+        type: vlan
+        vlan:
+          base-iface: bond0
+          id: 101
+      - description: Interface for VLAN 102 (ODF Cluster/Private Network)
+        ipv4:
+          enabled: false
+        ipv6:
+          enabled: false
+        name: bond0.102
+        state: up
+        type: vlan
+        vlan:
+          base-iface: bond0
+          id: 102
+      - description: Shim Interface for Host Connectivity to VLAN 102 (ODF Public Network)
+        ipv4:
+          address:
+            - ip: 192.168.101.11
+              prefix-length: 24
+          dhcp: false
+          enabled: true
+        ipv6:
+          enabled: false
+        mac-vlan:
+          base-iface: bond0.101
+          mode: bridge
+          promiscuous: true
+        name: odf-pub-shim
+        state: up
+        type: mac-vlan
+    routes:
+      config:
+        - destination: 192.168.101.0/24
+          next-hop-interface: odf-pub-shim
+  nodeSelector:
+    kubernetes.io/hostname: <node-name>
+ 
