@@ -35,3 +35,7 @@ instructing pg 2.6 on osd.0 to repair
 
 # WAIT A FEW MINUTES TO BE RECOVERED
 ```
+
+```
+ceph osd tree
+```
