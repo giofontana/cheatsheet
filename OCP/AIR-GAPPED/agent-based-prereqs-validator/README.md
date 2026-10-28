@@ -1,6 +1,6 @@
 # OpenShift Agent-Based Installation Prerequisite Validator
 
-`validate-prereqs.sh` checks an OpenShift agent-based installation's `install-config.yaml` and `agent-config.yaml` before installation. It validates configuration consistency, resolves expected DNS records, and checks mirror-registry connectivity and TLS when registry settings are present.
+`validate-prereqs.sh` checks an OpenShift agent-based installation's `install-config.yaml` and `agent-config.yaml` before installation. It validates configuration consistency, resolves expected DNS records, checks mirror-registry connectivity and TLS when registry settings are present, and queries the NTP servers listed in `additionalNTPSources`.
 
 The script reports each check as `PASS`, `WARN`, or `FAIL`. Warnings do not cause a nonzero exit; any failure does.
 
@@ -42,6 +42,7 @@ Options:
 --dns-server IP   Query this DNS server; may be supplied more than once
 --skip-dns        Skip DNS checks
 --skip-registry   Skip mirror-registry checks
+--skip-ntp        Skip NTP checks (including NTP hostname DNS lookups)
 -h, --help        Show usage
 ```
 
@@ -64,6 +65,7 @@ Without `--dns-server`, the script uses DNS servers listed in the agent config's
 - `additionalTrustBundle` PEM certificates and their expiration dates.
 - `imageDigestSources` entries (or deprecated `imageContentSources`, with a warning).
 - Agent-config API version and kind, cluster name, host roles, interfaces and MAC addresses, host IPs, rendezvous IP, and replica counts.
+- `additionalNTPSources`: must be a list of IP addresses or hostnames; duplicates and an empty list are warnings.
 
 Some checks are informational or warnings rather than failures. For example, SSH-key shape, missing mirror credentials, and hosts without an explicit role are warnings.
 
@@ -75,14 +77,25 @@ For each selected resolver, the script checks:
 - A generated name under `*.apps.<cluster>.<base-domain>`, plus the console and OAuth application names, against the first ingress VIP, when defined.
 - A records for configured hosts with static IPs and PTR records for hosts and API VIPs.
 - A records for mirror registry hostnames.
+- A records for `additionalNTPSources` hostnames (unless `--skip-ntp` is used).
 
-PTR mismatches, missing host records, and records for hosts without static IPs are warnings. API, ingress, and mirror DNS failures are failures.
+PTR mismatches, missing host records, and records for hosts without static IPs are warnings. API, ingress, mirror, and NTP DNS failures are failures.
 
 ### Mirror registry
 
 Registry checks run only when mirror sources are configured and `additionalTrustBundle` contains a certificate bundle. For each mirror registry, the script checks TLS trust and hostname/IP verification, the registry `/v2/` endpoint, and pull-secret authentication when credentials are available. For mirror paths, it also attempts to list repository tags; inability to list tags is reported as a warning.
 
 Use `--skip-registry` to omit these network checks. If mirror sources are present without a trust bundle, registry checks are skipped with a warning.
+
+### NTP
+
+When `agent-config.yaml` sets `additionalNTPSources`, the script sends one SNTP request (UDP port 123) to each source and reports the server's stratum and the clock offset relative to the machine running the script. Problems are warnings rather than failures, because the query runs from this machine and the cluster nodes may be on a network segment with different access:
+
+- no reply (timeout or blocked UDP/123);
+- the server reports an unsynchronized clock (leap indicator 3 or stratum 16) or sends a kiss-of-death reply;
+- the name cannot be resolved by the system resolver.
+
+Use `--skip-ntp` to omit these checks.
 
 ## Example output
 

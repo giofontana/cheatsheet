@@ -5,8 +5,9 @@
 #   1) install-config.yaml / agent-config.yaml format and consistency
 #   2) DNS records (api, api-int, *.apps, nodes, PTR)
 #   3) Mirror registry TLS/auth, using additionalTrustBundle + imageDigestSources
+#   4) NTP servers from agent-config additionalNTPSources (SNTP query from this host)
 #
-# Usage: ./validate-prereqs.sh <config-dir> [--dns-server IP]... [--skip-dns] [--skip-registry]
+# Usage: ./validate-prereqs.sh <config-dir> [--dns-server IP]... [--skip-dns] [--skip-registry] [--skip-ntp]
 #
 # Requires: python3 + PyYAML, openssl, curl, dig or nslookup.
 # Exit code: 0 if no FAIL, 1 otherwise.
@@ -22,11 +23,13 @@ CONFIG_DIR=""
 DNS_OVERRIDE=""
 SKIP_DNS=0
 SKIP_REGISTRY=0
+SKIP_NTP=0
 while [ $# -gt 0 ]; do
   case "$1" in
     --dns-server) [ $# -ge 2 ] || usage; DNS_OVERRIDE="${DNS_OVERRIDE} $2"; shift 2 ;;
     --skip-dns) SKIP_DNS=1; shift ;;
     --skip-registry) SKIP_REGISTRY=1; shift ;;
+    --skip-ntp) SKIP_NTP=1; shift ;;
     -h|--help) usage ;;
     -*) echo "Unknown option: $1" >&2; usage ;;
     *) [ -z "$CONFIG_DIR" ] || usage; CONFIG_DIR="$1"; shift ;;
@@ -364,6 +367,28 @@ if ac is not None:
         if str(vip) in map(str, ips):
             out("FAIL", f"agent-config: VIP {vip} is also assigned to a host")
 
+    ntp = ac.get("additionalNTPSources")
+    if ntp is not None:
+        if not isinstance(ntp, list):
+            out("FAIL", "agent-config: additionalNTPSources must be a list")
+            ntp = []
+        elif not ntp:
+            out("WARN", "agent-config: additionalNTPSources is empty")
+        valid = []
+        for src in ntp:
+            src = str(src).strip()
+            if parse_ip(src) is None and not re.match(r"^(?=.{1,253}$)([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)*[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?$", src):
+                out("FAIL", f"agent-config: additionalNTPSources entry '{src}' is not an IP address or hostname")
+                continue
+            valid.append(src)
+        dups = sorted({v for v in valid if valid.count(v) > 1})
+        if dups:
+            out("WARN", f"agent-config: duplicate additionalNTPSources: {', '.join(dups)}")
+        elif valid:
+            out("PASS", f"agent-config: {len(valid)} additionalNTPSources valid ({', '.join(valid)})")
+        for src in dict.fromkeys(valid):
+            fact("NTP_SOURCE", src)
+
     rip = parse_ip(ac.get("rendezvousIP"))
     if rip is None:
         out("FAIL", f"agent-config: rendezvousIP '{ac.get('rendezvousIP')}' missing or invalid")
@@ -390,7 +415,7 @@ PY
 )
 
 CLUSTER=""; BASE=""; CA_BUNDLE=""
-API_VIPS=""; INGRESS_VIPS=""; HOSTS=""; DNS_SERVERS=""; MIRRORS=""; CERTS=""
+API_VIPS=""; INGRESS_VIPS=""; HOSTS=""; DNS_SERVERS=""; MIRRORS=""; CERTS=""; NTP_SOURCES=""
 while IFS= read -r line; do
   case "$line" in
     PASS\|*) pass "${line#PASS|}" ;;
@@ -402,6 +427,7 @@ while IFS= read -r line; do
     API_VIP=*)     API_VIPS="${API_VIPS} ${line#*=}" ;;
     INGRESS_VIP=*) INGRESS_VIPS="${INGRESS_VIPS} ${line#*=}" ;;
     CERT=*)        CERTS="${CERTS} ${line#*=}" ;;
+    NTP_SOURCE=*)  NTP_SOURCES="${NTP_SOURCES} ${line#*=}" ;;
     HOST=*)        HOSTS="${HOSTS}${line#*=}"$'\n' ;;
     MIRROR=*)      MIRRORS="${MIRRORS}${line#*=}"$'\n' ;;
     DNS_SERVER=*)  case " $DNS_SERVERS " in *" ${line#*=} "*) ;; *) DNS_SERVERS="${DNS_SERVERS} ${line#*=}" ;; esac ;;
@@ -527,6 +553,11 @@ EOF
     done <<EOF
 $(echo "$MIRRORS" | awk 'NF && !seen[$1]++')
 EOF
+    if [ "$SKIP_NTP" -eq 0 ]; then
+      for src in $NTP_SOURCES; do
+        is_ip "$src" || check_a fail "$src" "-" "$srv"
+      done
+    fi
   done
 fi
 
@@ -668,6 +699,65 @@ EOF
   done <<EOF
 $MIRRORS
 EOF
+fi
+
+# ntp_query SERVER -> prints "OK|<stratum>|<offset s>", "UNSYNC|<detail>", "NOREPLY|<detail>" or "ERROR|<detail>"
+# Single SNTP (RFC 4330) client request over UDP/123.
+ntp_query() {
+  python3 - "$1" <<'PY' 2>&1
+import socket, struct, sys, time
+host = sys.argv[1]
+NTP_EPOCH = 2208988800
+
+def ts(b):
+    sec, frac = struct.unpack("!II", b)
+    return sec - NTP_EPOCH + frac / 2**32
+
+try:
+    family, _, _, _, addr = socket.getaddrinfo(host, 123, 0, socket.SOCK_DGRAM)[0]
+except socket.gaierror as e:
+    print(f"ERROR|cannot resolve: {e}"); sys.exit()
+sock = socket.socket(family, socket.SOCK_DGRAM)
+sock.settimeout(3)
+try:
+    t0 = time.time()
+    sock.sendto(b"\x23" + 47 * b"\0", addr)  # LI=0, VN=4, Mode=3 (client)
+    data, _ = sock.recvfrom(512)
+    t3 = time.time()
+except OSError as e:
+    print(f"NOREPLY|{e}"); sys.exit()
+if len(data) < 48:
+    print("ERROR|short reply"); sys.exit()
+li, stratum = data[0] >> 6, data[1]
+if stratum == 0:
+    print(f"UNSYNC|kiss-of-death {data[12:16].decode(errors='replace')}")
+elif li == 3 or stratum >= 16:
+    print(f"UNSYNC|server reports unsynchronized clock (stratum {stratum})")
+else:
+    offset = ((ts(data[32:40]) - t0) + (ts(data[40:48]) - t3)) / 2
+    print(f"OK|{stratum}|{offset:+.3f}")
+PY
+}
+
+# ---------------------------------------------------------------- 4) NTP
+section "4) NTP"
+if [ "$SKIP_NTP" -eq 1 ]; then
+  warn "NTP checks skipped (--skip-ntp)"
+elif [ -z "$NTP_SOURCES" ]; then
+  info "no additionalNTPSources defined, skipping"
+else
+  # Queried from this machine: nodes on another network segment may still reach a server that fails here.
+  for src in $NTP_SOURCES; do
+    res=$(ntp_query "$src")
+    case "$res" in
+      OK\|*)
+        stratum=$(echo "$res" | cut -d'|' -f2); offset=$(echo "$res" | cut -d'|' -f3)
+        pass "$src: NTP reply, stratum $stratum, offset ${offset}s vs this host" ;;
+      NOREPLY\|*) warn "$src: no NTP reply on UDP/123 from this host (${res#*|})" ;;
+      UNSYNC\|*)  warn "$src: ${res#*|}" ;;
+      *)          warn "$src: NTP query failed (${res#*|})" ;;
+    esac
+  done
 fi
 
 # ---------------------------------------------------------------- summary
