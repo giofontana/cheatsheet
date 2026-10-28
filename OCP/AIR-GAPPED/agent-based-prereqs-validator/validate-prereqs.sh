@@ -744,7 +744,7 @@ section "4) NTP"
 if [ "$SKIP_NTP" -eq 1 ]; then
   warn "NTP checks skipped (--skip-ntp)"
 elif [ -z "$NTP_SOURCES" ]; then
-  info "no additionalNTPSources defined, skipping"
+  warn "no additionalNTPSources defined, skipping. Confirm the nodes do not need NTP (e.g. time is provided by DHCP or the default pool is reachable)"
 else
   # Queried from this machine: nodes on another network segment may still reach a server that fails here.
   for src in $NTP_SOURCES; do

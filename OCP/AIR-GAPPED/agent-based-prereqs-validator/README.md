@@ -95,7 +95,7 @@ When `agent-config.yaml` sets `additionalNTPSources`, the script sends one SNTP 
 - the server reports an unsynchronized clock (leap indicator 3 or stratum 16) or sends a kiss-of-death reply;
 - the name cannot be resolved by the system resolver.
 
-Use `--skip-ntp` to omit these checks.
+If `additionalNTPSources` is not defined, the script reports a warning so you can confirm the nodes get time some other way (for example, from DHCP). Use `--skip-ntp` to omit these checks.
 
 ## Example output
 
