@@ -110,6 +110,7 @@ You need `oc`, logged in as a user who can create MachineConfigs
 ```sh
 ./enable-multipath.sh            # prompts for the pool (default: worker)
 ./enable-multipath.sh master     # uses master as the default answer
+./enable-multipath.sh master -y  # applies to master without prompting
 ```
 
 The script:
@@ -121,6 +122,11 @@ The script:
    again updates that MachineConfig.
 4. Prints the MachineConfig and `multipath.conf`, then asks once more before
    it runs `oc apply`.
+
+With `-y`, the script prints the same output but answers every prompt
+itself. It confirms the cluster, uses the pool you gave (or `worker`) and
+applies the MachineConfig, so check that `oc` is logged in to the right
+cluster first. The nodes in the pool reboot.
 
 ### Which pool to choose
 

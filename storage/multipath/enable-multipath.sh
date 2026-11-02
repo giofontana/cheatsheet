@@ -3,12 +3,34 @@
 
 set -euo pipefail
 
-if [ "${1:-}" == "--help" ] || [ "${1:-}" == "-h" ]; then
-    echo "Usage: $0 [ROLE]"
+usage() {
+    echo "Usage: $0 [ROLE] [-y]"
     echo "  [ROLE] - Optional. The role of the nodes to which the multipath configuration will be applied (e.g., worker, master)."
     echo "           If omitted, you will be prompted for it."
-    exit 0
-fi
+    echo "  -y     - Optional. Answer yes to all prompts and use ROLE (default: worker) without asking."
+}
+
+ASSUME_YES=false
+ROLE_ARG=""
+for arg in "$@"; do
+    case "$arg" in
+        -h|--help) usage; exit 0 ;;
+        -y|--yes) ASSUME_YES=true ;;
+        -*) echo "Error: unknown option '${arg}'."; usage; exit 1 ;;
+        *) ROLE_ARG="$arg" ;;
+    esac
+done
+
+# Prompt for an answer, or print the prompt with the -y answer and use that
+ask() {
+    local prompt=$1 var=$2 yes_answer=$3
+    if [ "$ASSUME_YES" = true ]; then
+        echo "${prompt}${yes_answer}"
+        printf -v "$var" '%s' "$yes_answer"
+    else
+        read -r -p "$prompt" "$var"
+    fi
+}
 
 # multipath.conf is read from the same folder as this script
 MULTIPATH_CONF_FILE="$(cd "$(dirname "$0")" && pwd)/multipath.conf"
@@ -52,7 +74,7 @@ CLUSTER_VERSION=$(oc get clusterversion version -o jsonpath='{.status.desired.ve
 [ -n "$CLUSTER_VERSION" ] && echo "  Version:    ${CLUSTER_VERSION}"
 echo
 
-read -r -p "Is this the correct cluster? [y/N]: " CLUSTER_OK
+ask "Is this the correct cluster? [y/N]: " CLUSTER_OK y
 if [[ ! "$CLUSTER_OK" =~ ^[Yy]$ ]]; then
     echo "Aborted. Switch to the correct cluster and run the script again."
     exit 1
@@ -64,8 +86,8 @@ echo "Available MachineConfigPools:"
 oc get mcp -o custom-columns='NAME:.metadata.name,MACHINECOUNT:.status.machineCount' --no-headers | sed 's/^/  /'
 echo
 
-DEFAULT_ROLE=${1:-worker}
-read -r -p "Which ROLE should the multipath configuration be applied to? [${DEFAULT_ROLE}]: " ROLE
+DEFAULT_ROLE=${ROLE_ARG:-worker}
+ask "Which ROLE should the multipath configuration be applied to? [${DEFAULT_ROLE}]: " ROLE "$DEFAULT_ROLE"
 ROLE=${ROLE:-$DEFAULT_ROLE}
 
 if ! oc get mcp "$ROLE" > /dev/null 2>&1; then
@@ -119,7 +141,7 @@ echo "$MULTIPATH_CONF"
 echo "------------------------------------------------------------------------------"
 echo
 
-read -r -p "Apply this MachineConfig to the '${ROLE}' pool? Nodes will reboot. [y/N]: " APPLY_OK
+ask "Apply this MachineConfig to the '${ROLE}' pool? Nodes will reboot. [y/N]: " APPLY_OK y
 if [[ ! "$APPLY_OK" =~ ^[Yy]$ ]]; then
     echo "Aborted. Nothing was applied."
     exit 0
