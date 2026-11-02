@@ -69,6 +69,9 @@ spec:
 
 ### multipath.conf
 
+The script reads the file contents from [`multipath.conf`](multipath.conf)
+in this folder:
+
 ```
 defaults {
     user_friendly_names no
@@ -96,8 +99,8 @@ blacklist {
 This is a generic starting point. Most storage vendors publish their own
 settings, such as a `devices {}` section or a different `find_multipaths`
 value, and some CSI drivers require them. Check your array's and CSI
-driver's documentation, and edit `MULTIPATH_CONF` in the script before you
-run it.
+driver's documentation, and edit `multipath.conf` before you run the
+script.
 
 ## Run the script
 

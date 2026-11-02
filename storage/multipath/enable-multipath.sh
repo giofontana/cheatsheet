@@ -10,12 +10,19 @@ if [ "${1:-}" == "--help" ] || [ "${1:-}" == "-h" ]; then
     exit 0
 fi
 
+# multipath.conf is read from the same folder as this script
+MULTIPATH_CONF_FILE="$(cd "$(dirname "$0")" && pwd)/multipath.conf"
+if [ ! -f "$MULTIPATH_CONF_FILE" ]; then
+    echo "Error: ${MULTIPATH_CONF_FILE} not found."
+    exit 1
+fi
+
 cat << 'EOF'
 ==============================================================================
  Enable multipath on OpenShift nodes
 ==============================================================================
 This script creates a MachineConfig named 99-<ROLE>-multipath that:
-  - writes /etc/multipath.conf (user_friendly_names no, find_multipaths yes)
+  - writes /etc/multipath.conf from the multipath.conf next to this script
   - enables the iscsid and multipathd systemd services
 
 The MachineConfig is applied to every node in the selected MachineConfigPool.
@@ -71,16 +78,7 @@ if oc get machineconfig "$MC_NAME" > /dev/null 2>&1; then
     echo "Warning: MachineConfig '${MC_NAME}' already exists and will be updated."
 fi
 
-MULTIPATH_CONF=$(cat << 'EOF'
-defaults {
-    user_friendly_names no
-    find_multipaths yes
-    enable_foreign "^$"
-}
-blacklist {
-}
-EOF
-)
+MULTIPATH_CONF=$(cat "$MULTIPATH_CONF_FILE")
 # 'tr -d' instead of 'base64 -w0' so it works with both GNU and macOS base64
 MULTIPATH_CONF_B64=$(printf '%s\n' "$MULTIPATH_CONF" | base64 | tr -d '\n')
 
