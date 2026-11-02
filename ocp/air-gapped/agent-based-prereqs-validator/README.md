@@ -1,6 +1,6 @@
 # OpenShift Agent-Based Installation Prerequisite Validator
 
-`validate-prereqs.sh` checks an OpenShift agent-based installation's `install-config.yaml` and `agent-config.yaml` before installation. It validates configuration consistency, resolves expected DNS records, checks mirror-registry connectivity and TLS when registry settings are present, and queries the NTP servers listed in `additionalNTPSources`.
+`validate-prereqs.sh` checks an OpenShift agent-based installation's `install-config.yaml` and `agent-config.yaml` before installation. It validates configuration consistency, resolves expected DNS records, checks mirror-registry connectivity and TLS when registry settings are present, queries the NTP servers listed in `additionalNTPSources`, and verifies that proxy exclusions cover the API and mirror registries.
 
 The script reports each check as `PASS`, `WARN`, or `FAIL`. Warnings do not cause a nonzero exit; any failure does.
 
@@ -96,6 +96,21 @@ When `agent-config.yaml` sets `additionalNTPSources`, the script sends one SNTP 
 - the name cannot be resolved by the system resolver.
 
 If `additionalNTPSources` is not defined, the script reports a warning so you can confirm the nodes get time some other way (for example, from DHCP). Use `--skip-ntp` to omit these checks.
+
+### Proxy
+
+The script checks that these targets bypass the proxy:
+
+- `api.<cluster>.<base-domain>` and `api-int.<cluster>.<base-domain>`
+- the API VIPs
+- each mirror registry host from `imageDigestSources`
+
+It checks two proxy configurations independently:
+
+- **This host's environment.** If `https_proxy`/`http_proxy` (or the uppercase forms) is set, the targets must be covered by `no_proxy`/`NO_PROXY`. Otherwise `curl`, `oc-mirror`, and `openshift-install` on this host send that traffic, including the registry checks above, through the proxy.
+- **`install-config.yaml` `proxy`.** If `httpProxy` or `httpsProxy` is set, the targets must be covered by `proxy.noProxy`. Entries the installer adds automatically (`api-int` and the machine, cluster, and service network CIDRs) count as covered.
+
+An entry covers a target when it is `*`, the same name, a parent domain (with or without a leading `.` or `*.`), or, for IP targets, a matching IP address or CIDR. Names are not resolved, so a hostname is not covered by an entry for its IP address. An uncovered target is a failure. Proxy credentials are removed from the URLs before they are printed.
 
 ## Example output
 

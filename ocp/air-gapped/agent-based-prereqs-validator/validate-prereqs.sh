@@ -6,6 +6,7 @@
 #   2) DNS records (api, api-int, *.apps, nodes, PTR)
 #   3) Mirror registry TLS/auth, using additionalTrustBundle + imageDigestSources
 #   4) NTP servers from agent-config additionalNTPSources (SNTP query from this host)
+#   5) Proxy: api, api-int, API VIPs and mirror registries covered by noProxy / no_proxy
 #
 # Usage: ./validate-prereqs.sh <config-dir> [--dns-server IP]... [--skip-dns] [--skip-registry] [--skip-ntp]
 #
@@ -15,7 +16,7 @@
 set -u
 
 usage() {
-  sed -n '9p' "$0" | sed 's/^# //'
+  grep -m1 '^# Usage:' "$0" | sed 's/^# //'
   exit 2
 }
 
@@ -185,6 +186,8 @@ if ic is not None:
             if n1.version == n2.version and n1.overlaps(n2):
                 overlap = True
                 out("FAIL", f"install-config: {l1} {n1} overlaps {l2} {n2}")
+    for _, n in flat:
+        fact("NET", n)
     if flat and not overlap:
         out("PASS", "install-config: network CIDRs valid and non-overlapping (" +
             ", ".join(f"{l}={n}" for l, n in flat) + ")")
@@ -231,6 +234,13 @@ if ic is not None:
                 out("PASS", f"install-config: pullSecret is valid JSON ({len(auths)} registries: {', '.join(auths)})")
         except (ValueError, AttributeError) as e:
             out("FAIL", f"install-config: pullSecret is not valid JSON: {e}")
+
+    # Proxy (credentials are stripped from the URL before printing)
+    proxy = get(ic, "proxy")
+    if isinstance(proxy, dict) and (proxy.get("httpProxy") or proxy.get("httpsProxy")):
+        url = str(proxy.get("httpsProxy") or proxy.get("httpProxy"))
+        fact("IC_PROXY", re.sub(r"//[^@/]*@", "//", url))
+        fact("IC_NO_PROXY", proxy.get("noProxy") or "")
 
     # sshKey
     ssh = get(ic, "sshKey")
@@ -414,7 +424,7 @@ if ac is not None:
 PY
 )
 
-CLUSTER=""; BASE=""; CA_BUNDLE=""
+CLUSTER=""; BASE=""; CA_BUNDLE=""; IC_PROXY=""; IC_NO_PROXY=""; NETS=""
 API_VIPS=""; INGRESS_VIPS=""; HOSTS=""; DNS_SERVERS=""; MIRRORS=""; CERTS=""; NTP_SOURCES=""
 while IFS= read -r line; do
   case "$line" in
@@ -424,6 +434,9 @@ while IFS= read -r line; do
     CLUSTER=*)     CLUSTER="${line#*=}" ;;
     BASE=*)        BASE="${line#*=}" ;;
     CA_BUNDLE=*)   CA_BUNDLE="${line#*=}" ;;
+    IC_PROXY=*)    IC_PROXY="${line#*=}" ;;
+    IC_NO_PROXY=*) IC_NO_PROXY="${line#*=}" ;;
+    NET=*)         NETS="${NETS},${line#*=}" ;;
     API_VIP=*)     API_VIPS="${API_VIPS} ${line#*=}" ;;
     INGRESS_VIP=*) INGRESS_VIPS="${INGRESS_VIPS} ${line#*=}" ;;
     CERT=*)        CERTS="${CERTS} ${line#*=}" ;;
@@ -758,6 +771,87 @@ else
       *)          warn "$src: NTP query failed (${res#*|})" ;;
     esac
   done
+fi
+
+# no_proxy_check SCOPE NO_PROXY IMPLICIT TARGET... -> "PASS|msg" / "FAIL|msg" lines
+# Matching follows curl/Go: "*" matches everything, a domain matches itself and its
+# subdomains (leading "." or "*." optional), an IP/CIDR matches IP targets only
+# (names are not resolved). IMPLICIT lists entries the installer adds on its own.
+no_proxy_check() {
+  python3 - "$@" <<'PY'
+import ipaddress, sys
+scope, explicit, implicit, targets = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4:]
+
+def entries(v):
+    return [e.strip().lower() for e in v.split(",") if e.strip()]
+
+def match(target, ents):
+    t = target.lower().rstrip(".")
+    try:
+        tip = ipaddress.ip_address(t)
+    except ValueError:
+        tip = None
+    for e in ents:
+        if e == "*":
+            return e
+        if tip is not None:
+            try:
+                if tip in ipaddress.ip_network(e, strict=False):
+                    return e
+            except ValueError:
+                pass
+            continue
+        d = e.split(":")[0].lstrip("*").lstrip(".")
+        if d and (t == d or t.endswith("." + d)):
+            return e
+    return None
+
+for t in dict.fromkeys(targets):
+    m = match(t, entries(explicit))
+    if m:
+        print(f"PASS|{scope}: {t} bypasses the proxy (entry '{m}')")
+        continue
+    m = match(t, entries(implicit))
+    if m:
+        print(f"PASS|{scope}: {t} bypasses the proxy ('{m}' is added to noProxy by the installer)")
+    else:
+        print(f"FAIL|{scope}: {t} not covered, traffic would go through the proxy")
+PY
+}
+# report LINES -> pass/fail for each "LEVEL|msg" line
+report() {
+  while IFS= read -r line; do
+    case "$line" in
+      PASS\|*) pass "${line#PASS|}" ;;
+      WARN\|*) warn "${line#WARN|}" ;;
+      FAIL\|*) fail "${line#FAIL|}" ;;
+      ?*)      info "$line" ;;
+    esac
+  done <<EOF
+$1
+EOF
+}
+
+# ---------------------------------------------------------------- 5) proxy
+section "5) Proxy"
+PROXY_TARGETS="$API_VIPS $(echo "$MIRRORS" | awk 'NF { sub(/:[0-9]+$/, "", $1); print $1 }')"
+[ -n "$CLUSTER" ] && [ -n "$BASE" ] && PROXY_TARGETS="api.${CLUSTER}.${BASE} api-int.${CLUSTER}.${BASE} $PROXY_TARGETS"
+
+# This host: curl, openshift-install and oc-mirror honour these variables (lowercase wins, as in curl).
+ENV_PROXY="${https_proxy:-${HTTPS_PROXY:-${http_proxy:-${HTTP_PROXY:-}}}}"
+if [ -n "$ENV_PROXY" ]; then
+  echo "  -- environment of this host (proxy: $(echo "$ENV_PROXY" | sed 's#//[^@/]*@#//#'))"
+  report "$(no_proxy_check "no_proxy" "${no_proxy:-${NO_PROXY:-}}" "" $PROXY_TARGETS)"
+else
+  info "no http_proxy/https_proxy set in this host's environment"
+fi
+
+# Cluster: install-config proxy; the installer adds api-int and the cluster/machine/service networks itself.
+if [ -n "$IC_PROXY" ]; then
+  echo "  -- install-config proxy ($IC_PROXY)"
+  report "$(no_proxy_check "install-config noProxy" "$IC_NO_PROXY" "api-int.${CLUSTER}.${BASE}${NETS}" $PROXY_TARGETS)"
+else
+  info "no proxy defined in install-config"
 fi
 
 # ---------------------------------------------------------------- summary
